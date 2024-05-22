@@ -1,0 +1,1741 @@
+openapi: 3.0.0
+info:
+  title: citi food delivery
+  version: "1.0.0"
+  description: |
+    API documentation for managing citi food derivery.
+  contact:
+    name: Imanariyo Baptiste
+    email: "imanariyo@gmail.com"
+    url: "tel:0787795163"
+servers:
+  - url: http://localhost:2222
+  - url: https://
+    description: Local development server
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Payment:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique identifier for the payment
+        userId:
+          type: string
+          description: ID of the user making the payment
+        orderId:
+          type: string
+          description: ID of the associated order
+       
+
+        subscriptionId:
+          type: string
+          description: ID of the associated subscription (if applicable)
+        amount:
+          type: number
+          description: Amount of the payment
+        currency:
+          type: string
+          description: Currency of the payment
+        paymentMethod:
+          type: string
+          description: Payment method used (e.g., credit card, PayPal)
+        transactionId:
+          type: string
+          description: ID of the payment transaction
+        status:
+          type: string
+          description: Status of the payment (e.g., 'pending', 'completed')
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time when the payment was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date and time when the payment was last updated
+    Review:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique identifier for the review
+        userId:
+          type: string
+          description: ID of the user who submitted the review
+        foodItem:
+          type: string
+          description: ID of the associated food item
+        rating:
+          type: number
+          description: Rating given in the review
+        comment:
+          type: string
+          description: Comment provided in the review
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time when the review was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date and time when the review was last updated
+    AddToCartRequest:
+      type: object
+      properties:
+        itemId:
+          type: string
+          description: ID of the item to add to the cart
+        quantity:
+          type: integer
+          description: Quantity of the item
+    UpdateCartRequest:
+      type: object
+      properties:
+        itemId:
+          type: string
+          description: ID of the item to update in the cart
+        quantity:
+          type: integer
+          description: New quantity of the item
+    RemoveFromCartRequest:
+      type: object
+      properties:
+        itemId:
+          type: string
+          description: ID of the item to remove from the cart
+    FoodItem:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "60fe5b6d2fba530015d48414"
+        name:
+          type: string
+          example: "Pizza"
+        image:
+          type: string
+          example: "http://example.com/image.jpg"
+        category:
+          type: array
+          items:
+            type: string
+            example: "60fe5b6d2fba530015d48413"
+        price:
+          type: number
+          example: 9.99
+        description:
+          type: string
+          example: "Delicious pizza with fresh ingredients"
+        availableDays:
+          type: array
+          items:
+            type: string
+            example: "Monday"
+        time:
+          type: string
+          example: "18:00-22:00"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-07-26T14:29:09.282Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-07-26T14:29:09.282Z"
+    Category:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 60fe5b6d2fba530015d48413
+        name:
+          type: string
+          example: "Beverages"
+        image:
+          type: string
+          example: "http://example.com/image.jpg"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-07-26T14:29:09.282Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-07-26T14:29:09.282Z"
+    Notification:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique identifier for the notification
+        orderId:
+          type: string
+          description: ID of the associated order
+        userId:
+          type: string
+          description: ID of the user receiving the notification
+        status:
+          type: string
+          description: Status of the notification (e.g., 'unread', 'read')
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time when the notification was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date and time when the notification was last updated
+    
+paths:
+  /auth/deleteUserById/{id}:
+    delete:
+      summary: "Delete a user by ID"
+      tags:
+        - 'authentication'
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the user to be deleted
+      responses:
+        '200':
+          description: "User deleted successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: "Success message"
+                    example: "User deleted successfully"
+        '404':
+          description: "User not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: "Error message"
+                    example: "User not found"
+        '500':
+          description: "Internal Server Error"         
+
+  /auth/signup:
+    post:
+      summary: User Signup
+      tags: [authentication]
+      operationId: signup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - fullNames
+                - email
+                - password
+                - phoneNumber
+                - sex
+                - location
+                - role
+              properties:
+                fullNames:
+                  type: string
+                  example: "John Doe"
+                sex:
+                  type: string
+                  example: "Male"  
+                email:
+                  type: string
+                  example: "imanariyobaptiste@gmail.com"
+                password:
+                  type: string
+                  example: "123"
+                phoneNumber:
+                  type: number
+                  example: 1234567890
+                location:
+                  type: string
+                  example: "City, Country"
+                role:
+                  type: string
+                  example: "user"
+      responses:
+        '200':
+          description: User registered successfully
+        '500':
+          description: Internal Server Error
+
+  /auth/login:
+    post:
+      summary: User Login
+      tags: [authentication]
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  example: "imanariyobaptiste@gmail.com"
+                password:
+                  type: string
+                  example: "123"
+      responses:
+        '200':
+          description: User logged in successfully
+        '401':
+          description: Unauthorized - Invalid credentials
+        '500':
+          description: Internal Server Error
+
+  /auth/forget:
+    post:
+      summary: Generate and Send OTP for Password Reset
+      tags: [authentication]
+      operationId: generateAndSendOTP
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  example: "imanariyobaptiste@gmail.com"
+      responses:
+        '200':
+          description: OTP generated and sent successfully
+        '404':
+          description: User not found
+        '500':
+          description: Internal Server Error
+
+  /auth/reset:
+    post:
+      summary: Verify OTP and Update Password
+      tags: [authentication]
+      operationId: verifyOTPAndUpdatePassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - otp
+                - newpassword
+              properties:
+                email:
+                  type: string
+                  example: "imanariyobaptiste@gmail.com"
+                otp:
+                  type: string
+                  example: "4225261"
+                newpassword:
+                  type: string
+                  example: "123"
+      responses:
+        '200':
+          description: Password updated successfully
+        '404':
+          description: User not found
+        '401':
+          description: Unauthorized - Invalid OTP
+        '500':
+          description: Internal Server Error
+
+  /auth/change:
+    post:
+      summary: Change Password (Authenticated Route)
+      tags: [authentication]
+      operationId: changepassword
+      parameters:
+        - name: Authorization
+          in: header
+          description: JWT token obtained after user login
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - currentpassword
+                - newpassword
+              properties:
+                currentpassword:
+                  type: string
+                  example: "123"
+                newpassword:
+                  type: string
+                  example: "123"
+      responses:
+        '200':
+          description: Password changed successfully
+        '401':
+          description: Unauthorized - Invalid token
+        '500':
+          description: Internal Server Error
+
+  /auth/getAllUsers:
+    get:
+      summary: 'Get all users'
+      tags:
+        - 'authentication'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 'Users retrieved successfully'
+          content:
+            application/json:
+              schema:
+                type: object
+
+ 
+  
+  /partner/createPartner:
+    post:
+      summary: Create a new partner
+      tags: 
+        - Partner
+      security:
+        - bearerAuth: []
+      description: Endpoint to create a new partner with support for image uploads.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Partner'
+      responses:
+        '201':
+          description: Partner created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Partner'
+  /partner/updatePartner/{id}:
+    put:
+      summary: Update an existing partner
+      tags:
+        - Partner
+      security:
+        - bearerAuth: []
+      description: Endpoint to update an existing partner.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the partner to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Partner'
+      responses:
+        '200':
+          description: Partner updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Partner'
+  /partner/deletePartner/{id}:
+    delete:
+      summary: Delete a partner by ID
+      tags:
+        - Partner
+      security:
+        - bearerAuth: []
+      description: Endpoint to delete a partner by ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the partner to delete
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Partner deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Partner deleted successfully
+                  data:
+                    type: null
+  /partner/getAllPartners:
+    get:
+      summary: Get all partners
+      tags:
+        - Partner
+      security:
+        - bearerAuth: []
+      description: Endpoint to retrieve all partners.
+      responses:
+        '200':
+          description: Successfully retrieved all partners
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Partner'
+  /partner/getPartnerById/{id}:
+    get:
+      summary: Get partner by ID
+      tags:
+        - Partner
+      security:
+        - bearerAuth: []
+      description: Endpoint to retrieve a partner by ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the partner to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved partner by ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Partner'
+  /service/createService:
+    post:
+      summary: Create a new service
+      tags: 
+        - Service
+      security:
+        - bearerAuth: []
+      description: Endpoint to create a new service.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Service'
+      responses:
+        '200':
+          description: Service created successfully
+  /service/readServices:
+    get:
+      summary: Get all services
+      tags:
+        - Service
+      security:
+        - bearerAuth: []
+      description: Endpoint to retrieve all services.
+      responses:
+        '200':
+          description: Successfully retrieved all services
+          content:
+            application/json:
+              schema:
+                // Define schema for array of services
+  /service/readServices/{id}:
+    get:
+      summary: Get a service by ID
+      tags:
+        - Service
+      security:
+        - bearerAuth: []
+      description: Endpoint to retrieve a service by ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the service to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved service by ID
+          content:
+            application/json:
+              schema:
+                // Define schema for a single service
+  /service/updateService/{id}:
+    put:
+      summary: Update a service by ID
+      tags:
+        - Service
+      security:
+        - bearerAuth: []
+      description: Endpoint to update a service by ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the service to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Service'
+      responses:
+        '200':
+          description: Service updated successfully
+  /service/deleteService/{id}:
+    delete:
+      summary: Delete a service by ID
+      tags:
+        - Service
+      security:
+        - bearerAuth: []
+      description: Endpoint to delete a service by ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the service to delete
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Service deleted successfully
+  /contact/createContact:
+    post:
+      summary: Create a new contact
+      tags: [contact]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  default: John Doe
+                email:
+                  type: string
+                  default: johndoe@example.com
+                subject:
+                  type: string
+                  default: Inquiry
+                telephone:
+                  type: string
+                  default: "+1234567890"
+                message:
+                  type: string
+                  default: Hello, I have a question.
+      responses:
+        '201':
+          description: Contact created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Contact created successfully
+                  data:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        example: 60fe5b6d2fba530015d48413
+                      name:
+                        type: string
+                        example: John Doe
+                      email:
+                        type: string
+                        example: johndoe@example.com
+                      subject:
+                        type: string
+                        example: Inquiry
+                      telephone:
+                        type: string
+                        example: "+1234567890"
+                      message:
+                        type: string
+                        example: Hello, I have a question.
+                      dateSent:
+                        type: string
+                        example: "2023-07-26T14:29:09.282Z"
+  /contact/replaycontact/{id}:
+    put:
+      summary: Update an existing contact by ID
+      tags: [contact]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: ID of the contact to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                
+                replaysubbject:
+                  type: string
+                  example: subject
+             
+                replaymessage:
+                  type: string
+                  example: Hello, I have a question.
+      responses:
+        '200':
+          description: Contact updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Contact updated successfully
+                  data:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        example: 60fe5b6d2fba530015d48413
+                      name:
+                        type: string
+                        example: John Doe
+                      email:
+                        type: string
+                        example: johndoe@example.com
+                      subject:
+                        type: string
+                        example: Inquiry
+                      telephone:
+                        type: string
+                        example: "+1234567890"
+                      message:
+                        type: string
+                        example: Hello, I have a question.
+                      dateSent:
+                        type: string
+                        example: "2023-07-26T14:29:09.282Z"
+  /contact/deleteContact/{id}:
+    delete:
+      summary: Delete an existing contact by ID
+      tags: [contact]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: ID of the contact to delete
+      responses:
+        '200':
+          description: Contact deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Contact deleted successfully
+  /contact/getAllContacts:
+    get:
+      summary: Retrieve all contacts
+      tags: [contact]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: All contacts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: All contacts retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                          example: 60fe5b6d2fba530015d48413
+                        name:
+                          type: string
+                          example: John Doe
+                        email:
+                          type: string
+                          example: johndoe@example.com
+                        subject:
+                          type: string
+                          example: Inquiry
+                        telephone:
+                          type: string
+                          example: "+1234567890"
+                        message:
+                          type: string
+                          example: Hello, I have a question.
+                        dateSent:
+                          type: string
+                          example: "2023-07-26T14:29:09.282Z"
+  /contact/getContactById/{id}:
+    get:
+      summary: Retrieve a contact by ID
+      tags: [contact]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: ID of the contact to retrieve
+      responses:
+        '200':
+          description: Contact retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Contact retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        example: 60fe5b6d2fba530015d48413
+                      name:
+                        type: string
+                        example: John Doe
+                      email:
+                        type: string
+                        example: johndoe@example.com
+                      subject:
+                        type: string
+                        example: Inquiry
+                      telephone:
+                        type: string
+                        example: "+1234567890"
+                      message:
+                        type: string
+                        example: Hello, I have a question.
+                      dateSent:
+                        type: string
+                        example: "2023-07-26T14:29:09.282Z"
+  /category/create:
+      post:
+       summary: Create a new category
+       tags: 
+         - Category
+       security:
+         - bearerAuth: []
+       requestBody:
+         required: true
+         content:
+           multipart/form-data:
+             schema:
+               type: object
+               properties:
+                 name:
+                   type: string
+                   example: "Beverages"
+                 image:
+                   type: string
+                   format: binary
+       responses:
+         '201':
+           description: Category created successfully
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/Category'
+         '500':
+           description: Internal Server Error
+  /category/get:
+     get:
+       summary: Get all categories
+       tags:
+         - Category
+       security:
+        - bearerAuth: []  
+       responses:
+         '200':
+           description: All categories retrieved successfully
+           content:
+             application/json:
+               schema:
+                 type: array
+                 items:
+                   $ref: '#/components/schemas/Category'
+         '500':
+           description: Internal Server Error
+  /category/get/{id}:
+     get:
+       summary: Get a category by ID
+       tags:
+         - Category
+       security:
+        - bearerAuth: []  
+       parameters:
+         - name: id
+           in: path
+           required: true
+           schema:
+             type: string
+           description: ID of the category to retrieve
+       responses:
+         '200':
+           description: Successfully retrieved category
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/Category'
+         '404':
+           description: Category not found
+           content:
+             application/json:
+               schema:
+                 type: object
+                 properties:
+                   message:
+                     type: string
+                     example: Category not found
+         '500':
+           description: Internal Server Error
+  /category/edit/{id}:
+     put:
+       summary: Update a category by ID
+       tags:
+         - Category
+       security:
+        - bearerAuth: []  
+       parameters:
+         - name: id
+           in: path
+           required: true
+           schema:
+             type: string
+           description: ID of the category to update
+       requestBody:
+         required: true
+         content:
+           multipart/form-data:
+             schema:
+               type: object
+               properties:
+                 name:
+                   type: string
+                   example: "Beverages"
+                 image:
+                   type: string
+                   format: binary
+       responses:
+         '200':
+           description: Category updated successfully
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/Category'
+         '404':
+           description: Category not found
+           content:
+             application/json:
+               schema:
+                 type: object
+                 properties:
+                   message:
+                     type: string
+                     example: Category not found
+         '500':
+           description: Internal Server Error
+  /category/delete/{id}:
+     delete:
+       summary: Delete a category by ID
+       tags:
+         - Category
+       security:
+        - bearerAuth: []  
+       parameters:
+         - name: id
+           in: path
+           required: true
+           schema:
+             type: string
+           description: ID of the category to delete
+       responses:
+         '200':
+           description: Category deleted successfully
+           content:
+             application/json:
+               schema:
+                 type: object
+                 properties:
+                   status:
+                     type: string
+                     example: success
+                   message:
+                     type: string
+                     example: Category deleted successfully
+         '404':
+           description: Category not found
+           content:
+             application/json:
+               schema:
+                 type: object
+                 properties:
+                   message:
+                     type: string
+                     example: Category not found
+         '500':
+           description: Internal Server Error  
+  /fooditem/create:
+    post:
+      summary: Create a new food item
+      tags: [fooditem]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Pizza"
+                image:
+                  type: string
+                  format: binary
+                category:
+                  type: array
+                  items:
+                    type: string
+                price:
+                  type: number
+                  example: 9.99
+                description:
+                  type: string
+                  example: "Delicious pizza with fresh ingredients"
+                availableDays:
+                  type: array
+                  items:
+                    type: string
+                  example: ["Monday", "Wednesday"]
+                time:
+                  type: string
+                  example: "18:00-22:00"
+      responses:
+        '201':
+          description: Food item created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodItem'
+        '500':
+          description: Internal Server Error
+
+  /fooditem/get:
+    get:
+      summary: Get all food items
+      tags: [fooditem]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved all food items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FoodItem'
+
+  /fooditem/get/{id}:
+    get:
+      summary: Get a food item by ID
+      tags: [fooditem]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "60fe5b6d2fba530015d48414"
+      responses:
+        '200':
+          description: Successfully retrieved food item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodItem'
+        '404':
+          description: Food item not found
+
+  /fooditem/edit/{id}:
+    put:
+      summary: Update a food item by ID
+      tags: [fooditem]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "60fe5b6d2fba530015d48414"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Pizza"
+                image:
+                  type: string
+                  format: binary
+                category:
+                  type: array
+                  items:
+                    type: string
+                price:
+                  type: number
+                  example: 9.99
+                description:
+                  type: string
+                  example: "Delicious pizza with fresh ingredients"
+                availableDays:
+                  type: array
+                  items:
+                    type: string
+                  example: ["Monday", "Wednesday"]
+                time:
+                  type: string
+                  example: "18:00-22:00"
+      responses:
+        '200':
+          description: Food item updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodItem'
+        '404':
+          description: Food item not found
+        '500':
+          description: Internal Server Error
+
+  /fooditem/delete/{id}:
+    delete:
+      summary: Delete a food item by ID
+      tags: [fooditem]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "60fe5b6d2fba530015d48414"
+      responses:
+        '200':
+          description: Food item deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Food item deleted successfully"
+        '404':
+          description: Food item not found
+        '500':
+          description: Internal Server Error
+  /favorite/create:
+    post:
+      summary: Create a new favorite
+      tags:
+        - favorite
+      security:
+        - bearerAuth: []
+      description: Create a new favorite entry for a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  description: The ID of the user
+                foodItem:
+                  type: string
+                  description: The ID of the food item
+              required:
+                - userId
+                - foodItem
+      responses:
+        '200':
+          description: Successfully created favorite
+        '400':
+          description: Invalid request body
+
+  /favorite/get/:
+    get:
+      summary: Get all favorites
+      tags:
+        - favorite
+      security:
+        - bearerAuth: []  
+      description: Retrieve all favorite entries for a user
+
+      responses:
+        '200':
+          description: Successfully retrieved favorites
+
+  /favorite/get/{id}:
+    get:
+      summary: Get favorite by ID
+      tags:
+        - favorite
+      security:
+        - bearerAuth: []  
+      description: Retrieve a favorite entry by its ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: The ID of the favorite entry
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved favorite
+        '404':
+          description: Favorite not found
+
+  /favorite/edit/{id}:
+    put:
+      summary: Update favorite by ID
+      tags:
+        - favorite
+      security:
+        - bearerAuth: []  
+      description: Update a favorite entry by its ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: The ID of the favorite entry
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  description: The ID of the user
+                foodItem:
+                  type: string
+                  description: The ID of the food item
+              required:
+                - userId
+                - foodItem
+      responses:
+        '200':
+          description: Successfully updated favorite
+        '400':
+          description: Invalid request body
+        '404':
+          description: Favorite not found
+
+  /favorite/delete/{id}:
+    delete:
+      summary: Delete favorite by ID
+      tags:
+        - favorite
+      security:
+        - bearerAuth: []  
+      description: Delete a favorite entry by its ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: The ID of the favorite entry
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully deleted favorite
+        '404':
+          description: Favorite not found
+
+  /cart/add-to-cart:
+    post:
+      summary: Add an item to the cart
+      tags: 
+        - Cart
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddToCartRequest'
+      responses:
+        '200':
+          description: Item added to the cart successfully
+        '500':
+          description: Internal Server Error
+
+  /cart/update-cart:
+    put:
+      summary: Update item quantity in the cart
+      tags: 
+        - Cart
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCartRequest'
+      responses:
+        '200':
+          description: Cart updated successfully
+        '500':
+          description: Internal Server Error
+
+  /cart/remove-from-cart:
+    delete:
+      summary: Remove an item from the cart
+      tags: 
+        - Cart
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemoveFromCartRequest'
+      responses:
+        '200':
+          description: Item removed from the cart successfully
+        '500':
+          description: Internal Server Error
+  /notification/create:
+    post:
+      summary: Create a new notification
+      tags: 
+        - Notification
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notification'
+      responses:
+        '201':
+          description: Notification created successfully
+        '500':
+          description: Internal Server Error
+
+  /notification/get:
+    get:
+      summary: Get all notifications
+      tags: 
+        - Notification
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Notifications retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+        '500':
+          description: Internal Server Error
+
+  /notification/get/{id}:
+    get:
+      summary: Get a notification by ID
+      tags: 
+        - Notification
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the notification to retrieve
+      responses:
+        '200':
+          description: Notification retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+        '404':
+          description: Notification not found
+        '500':
+          description: Internal Server Error
+
+  /notification/edit/{id}:
+    put:
+      summary: Update a notification by ID
+      tags: 
+        - Notification
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the notification to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notification'
+      responses:
+        '200':
+          description: Notification updated successfully
+        '404':
+          description: Notification not found
+        '500':
+          description: Internal Server Error
+
+  /notification/delete/{id}:
+    delete:
+      summary: Delete a notification by ID
+      tags: 
+        - Notification
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the notification to delete
+      responses:
+        '200':
+          description: Notification deleted successfully
+        '404':
+          description: Notification not found
+        '500':
+          description: Internal Server Error 
+  /payment/payfororder/{orderId}:
+    post:
+      summary: Make a payment for an order
+      tags: 
+        - Payment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the order to make payment for
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payment'
+      responses:
+        '201':
+          description: Payment successful
+        '500':
+          description: Internal Server Error
+
+  /payment/get/{id}:
+    get:
+      summary: Get a payment by ID
+      tags: 
+        - Payment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the payment to retrieve
+      responses:
+        '200':
+          description: Payment retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '404':
+          description: Payment not found
+        '500':
+          description: Internal Server Error
+
+  /payment/get:
+    get:
+      summary: Get all payments
+      tags: 
+        - Payment
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Payments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Payment'
+        '500':
+          description: Internal Server Error
+
+  /payment/edit/{id}:
+    put:
+      summary: Update a payment by ID
+      tags: 
+        - Payment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the payment to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payment'
+      responses:
+        '200':
+          description: Payment updated successfully
+        '404':
+          description: Payment not found
+        '500':
+          description: Internal Server Error
+
+  /payment/delete/{id}:
+    delete:
+      summary: Delete a payment by ID
+      tags: 
+        - Payment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the payment to delete
+      responses:
+        '200':
+          description: Payment deleted successfully
+        '404':
+          description: Payment not found
+        '500':
+          description: Internal Server Error
+  /review/create-review/foodItem:
+    post:
+      summary: Create a review for a food item
+      tags: 
+        - Review
+      security:
+        - bearerAuth: []  
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+      responses:
+        '201':
+          description: Review created successfully
+        '500':
+          description: Internal Server Error
+
+  /review/reviews/{id}:
+    get:
+      summary: Get all reviews for a specific food item
+      tags: 
+        - Review
+      security:
+        - bearerAuth: []  
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the food item to get reviews for
+      responses:
+        '200':
+          description: Reviews retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Review'
+        '404':
+          description: Reviews not found
+        '500':
+          description: Internal Server Error
+
+  /review/{id}:
+    put:
+      summary: Update a review by ID
+      tags: 
+        - Review
+      security:
+        - bearerAuth: []  
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the review to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+      responses:
+        '200':
+          description: Review updated successfully
+        '404':
+          description: Review not found
+        '500':
+          description: Internal Server Error
+
+    delete:
+      summary: Delete a review by ID
+      tags: 
+        - Review
+      security:
+        - bearerAuth: []  
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the review to delete
+      responses:
+        '200':
+          description: Review deleted successfully
+        '404':
+          description: Review not found
+        '500':
+          description: Internal Server Error
+    
