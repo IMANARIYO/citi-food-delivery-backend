@@ -1,7 +1,9 @@
-import express from 'express';
-import User from '../models/User.js';
-import { createModelHandler, readModelHandler, updateModelHandler, deleteModelHandler } from '../controllers/crud.js';
+import "../models/User.js";
+import express from "express";
+import { createModelHandler, deleteModelHandler, readModelHandler, updateModelHandler } from "../controllers/crud.js";
+import { User } from "../models/User.js";
 
+User
 const userRouter = express.Router();
 
 userRouter.post('/', createModelHandler(User));
