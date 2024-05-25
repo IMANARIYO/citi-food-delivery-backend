@@ -8,6 +8,7 @@ const orderSchema = new mongoose.Schema(
       required: true
     },
     email: { type: String, required: true },
+    delivelinglocation:{type:String,},
     items: [
       {
         foodItem: {
@@ -19,8 +20,14 @@ const orderSchema = new mongoose.Schema(
       }
     ],
     totalPrice: { type: Number, required: true },
-    status: { type: String, default: 'pending' }
+    status: { type: String, default: 'pending' },
+    customerPhone: { type: String, required: false },
+    driverphone: { type: String, required: false },
+    paymentId:{type:mongoose.Schema.Types.ObjectId,ref:'Payment'},
+    
   },
+
+
   { timestamps: true }
 ).set('strictPopulate', false);
 

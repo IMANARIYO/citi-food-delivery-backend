@@ -10,6 +10,7 @@ import paymentRouter from "./paymentEndpoints.js";
 import reviewRouter from "./reviewEndpoints.js";
 import subscriptionRouter from "./subscriptionEndpoints.js";
 import userRouter from "./userEndpoints.js";
+import weeklyMenuRouter from "./weeklymenu.js";
 
 // import cartRouter from "./cartEndpoints.js";
 
@@ -28,5 +29,5 @@ mainRouter.use('/favorite', favoriteRouter)
 mainRouter.use('/cart', cartRouter)
 mainRouter.use('/notification', notificationRouter)
 mainRouter.use('/auth',authRouter)
-
+mainRouter.use('/weeklymenu', weeklyMenuRouter)
 export default mainRouter

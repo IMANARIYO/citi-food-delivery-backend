@@ -6,10 +6,10 @@ import Order from "./Order.js";
 import Payment from "./Payment.js";
 import Review from "./Review.js";
 import Subscription from "./Subscription.js";
-import User from "./User.js";
-import User from "./User.js";
 import foodItem from "./foodItem.js";
+import { User } from "./User.js";
 
+User
 export {
   User,
   foodItem,

@@ -1,11 +1,11 @@
-import { User } from '../models/User.js'
-import { passComparer, passHashing } from '../utils/passwordfunctions.js'
+import { User } from "../models/User.js";
+import { passComparer, passHashing } from "../utils/passwordfunctions.js";
 
 export const changepassword = async (req, res, next) => {
   try {
     const { currentpassword, newpassword } = req.body
     const { userId, userEmail } = req
-    const user = awaitUser.findById(userId)
+    const user = await User.findById(userId)
     console.log('the passed useId', userId)
     console.log(user)
     if (!user) {

@@ -34,7 +34,11 @@ const usersSchema = new mongoose.Schema({
     },
     verified:{type:Boolean,
     default:false   },
+    location:{type:String,
+    },
+    phoneNumber:{type:String,}
     
+    ,delivelinglocation:{type:String,}
 }, {
     timestamps: { currentTime: () => new Date() }, 
   }

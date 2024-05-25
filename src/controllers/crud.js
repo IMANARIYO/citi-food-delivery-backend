@@ -1,6 +1,10 @@
 import Category from "../models/Category.js";
 import Favorite from "../models/Favorite.js";
+import Order from "../models/Order.js";
+import Payment from "../models/Payment.js";
+import WeeklyMenu from "../models/WeeklyMenu.js";
 import dotenv from "dotenv";
+import foodItem from "../models/foodItem.js";
 import mongoose from "mongoose";
 import { v2 as cloudinary } from "cloudinary";
 import { AppError, catchAsync } from "../middlewares/globaleerorshandling.js";
@@ -15,20 +19,11 @@ cloudinary.config({
 // Helper function to check and add categories
 const checkAndAddCategories = async (categories) => {
   console.log(categories);
-
-
   console.log(typeof(categories));
-
    const uniqueCategories = new Set();
    let categoryIds = [];
    categoryIds=categories;
-   for(let i=0; i<categoryIds.length; i++){
-     console.log('categoryId', categoryIds[i]);
-    //  const categoryExists = await Category.findById(categoryIds[i]);
-    //  if (categoryExists) {
-    //    uniqueCategories.add(categoryIds[i].toString());
-    //  }
-   }
+   
   for (const categoryId of categoryIds) {
     console.log('categoryId', categoryId);
     const categoryExists = await Category.findById(categoryId);
@@ -39,6 +34,19 @@ const checkAndAddCategories = async (categories) => {
   return Array.from(uniqueCategories);
 };
 
+// Helper function to check and add food items
+const checkAndAddFoodItems = async (foodItems) => {
+  const validFoodItems = [];
+  for (const foodItemId of foodItems) {
+    const foodItemExists = await foodItem.findById(foodItemId);
+    if (foodItemExists) {
+      validFoodItems.push(foodItemId);
+    } else {
+      throw new AppError(`FoodItem not found with ID: ${foodItemId}`, 404);
+    }
+  }
+  return validFoodItems;
+};
 // Combined create and update function
 const createOrUpdateObject = async (req, Model, isUpdate = false) => {
   let newObject = { ...req.body };
@@ -58,21 +66,41 @@ const createOrUpdateObject = async (req, Model, isUpdate = false) => {
   }
 
   if (req.files && req.files.image) {
-    console.log('Images processing', '____________________', process.env.CLOUD_NAME, "---", process.env.API_KEY, "---", process.env.API_SECRET);
+    // console.log('Images processing', '____________________', process.env.CLOUD_NAME, "---", process.env.API_KEY, "---", process.env.API_SECRET);
     newObject.image = (await cloudinary.uploader.upload(req.files.image[0].path)).secure_url;
   }
 
   // Check and deduplicate categories
   if (newObject.category && newObject.category.length > 0) {
     newObject.category = newObject.category.split(',');
-
+   
  
     newObject.category = await checkAndAddCategories(newObject.category);
+
+
+    if (Model === WeeklyMenu) {
+      // Specific handling for WeeklyMenu
+      const { day, foodItems } = newObject;
+  
+      // Check if the day already exists
+      const existingMenu = await WeeklyMenu.findOne({ day });
+  
+      if (existingMenu) {
+        // Day already exists, check for duplicates and push new food items
+        for (const item of foodItems) {
+          if (!existingMenu.foodItems.includes(item)) {
+            existingMenu.foodItems.push(item);
+          }
+        }
+        await existingMenu.save();
+        return existingMenu;
+      } else {
+        // Day doesn't exist, create a new menu for the day
+        return await WeeklyMenu.create(newObject);
+      }
+    }
+
     // Log the categories array before calling the function
-
-
-
-
   }
 
   if (isUpdate) {
@@ -84,12 +112,62 @@ const createOrUpdateObject = async (req, Model, isUpdate = false) => {
     documentToUpdate.set(newObject);
     return await documentToUpdate.save();
   } else {
-    let userId = req.userId ? req.userId : '65e32c1efd954736cf61b722';
-    req.body.userId=userId;
-    if(Model ==
-      Favorite ){
-        newObject.userId = userId;
+    let userId = req.userId 
+    const schemaPaths = Model.schema.paths;
+    if (schemaPaths.userId) {
+      newObject.userId = userId;
+    }
+  
+    // ? req.userId : '65e32c1efd954736cf61b722';
+    // req.body.userId=userId;
+
+    if (Model === Payment) {
+      const orderId = req.params.orderId;
+      const amount = req.body.amount;
+
+      // Check if the order exists
+      const order = await Order.findById(orderId);
+      if (!order) {
+        throw new AppError('Order not found', 404);
       }
+
+      // Check if the payment amount is correct
+      if (amount < order.totalPrice) {
+        throw new AppError('Payment amount is less than the order total price', 400);
+      }
+      if (amount > order.totalPrice) {
+        throw new AppError('Payment amount is greater than the order total price', 400);
+      }
+
+      // Set orderId and amount
+      newObject.orderId = orderId;
+      newObject.amount = amount;
+
+      // Create payment document
+      const payment = new Payment(newObject);
+      await payment.save();
+
+      // Update order with payment ID and status
+      order.paymentId = payment._id;
+      order.status = 'paid';
+      await order.save();
+
+      // Update payment status
+      payment.status = 'completed';
+      await payment.save();
+
+      // Create a notification
+      const notification = new Notification({
+        message: 'Order paid successfully. Delivery in process.',
+        orderId: order._id,
+        userId: userId,
+        status: 'unread',
+      });
+      await notification.save();
+
+      return payment;
+    }
+
 
     // Create operation
     return await Model.create(newObject);
@@ -109,39 +187,92 @@ const handleModelOperation = (Model, operation) => {
             message: `${Model.modelName} created successfully`,
             data: result
           });
+          case 'read':
+            let query;
+            if (req.userId) {
+              if (req.user.role === 'admin') {
+                query = Model.find();
+              } else {
+                if (Model === Order || Model === Payment || Model === Notification || Model === Favorite || Model === Cart) {
+                  query = Model.find({ userId: req.userId });
+                } else {
+                  query = Model.find();
+                }
+              }
+            } else {
+              query = Model.find();
+            }
+          
+            if (req.params.id) {
+              query.populate({
+                path: 'orderId',
+                populate: {
+                  path: 'items.foodItem',
+                  model: 'FoodItem'
+                }
+              }).populate('foodItems')
+                   .populate('foodItem')
+                   .populate('category')
+                   .populate('orderId')
+                   .populate('userId')
+                   .populate('items.foodItem')
+                   .populate('paymentId')
+                   .populate('reviews')
+                   .populate('subscriptionId')
+.populate("items")
+                   .populate('paymentId')
+                   .populate('reviews')
+                   .populate('category')
+                   .populate('subscriptionId');
+              try {
+                const result = await query.findById(req.params.id).exec();
+                if (!result) {
+                  return res.status(404).json({
+                    status: 'error',
+                    message: `${Model.modelName} not found with ID: ${req.params.id}`,
+                  });
+                }
+                return res.status(200).json({
+                  status: 'success',
+                  message: `${Model.modelName} retrieved successfully`,
+                  data: result,
+                });
+              } catch (error) {
+                return res.status(500).json({
+                  status: 'error',
+                  message: 'Internal Server Error',
+                });
+              }
+            } else {
+              query.populate('foodItems')
+                   .populate('foodItem')
+                   .populate('category')
+                   .populate('orderId')
+                   .populate('userId')
+                   .populate('paymentId')
+                   .populate('reviews')
+                   .populate('subscriptionId')
+.populate("items")
+                   .populate('items.foodItem')
+                   .populate('paymentId')
+                   .populate('reviews')
+                  
+              try {
+                const result = await query.exec();
+                return res.status(200).json({
+                  status: 'success',
+                  message: `All ${Model.modelName} retrieved successfully`,
+                  data: result,
+                });
+              } catch (error) {
+                return res.status(500).json({
+                  status: 'error',
+                  message: 'Internal Server Error',
+                });
+              }
+            }
           break;
-        case 'read':
-          if (req.params.id) {
-            result = await Model.findById(req.params.id)
-             .populate('foodItems')
-             .populate('foodItem')
-             .populate('category')
-             .populate('orderId')
-             .populate('userId')
-             .populate('reviews')
-             .populate('subscriptionId');
-            res.status(200).json({
-              status: 'success',
-              message: `${Model.modelName} retrieved successfully`,
-              data: result,
-            });
-          } else {
-            result = await Model.find()
-             .populate('foodItems')
-             .populate('foodItem')
-             .populate('category')
-             .populate('orderId')
-             .populate('userId')
-             .populate('reviews')
-             .populate('subscriptionId');
-            res.status(200).json({
-              status: 'success',
-              message: `All ${Model.modelName} retrieved successfully`,
-              data: result,
-            });
-          }
-          break;
-        case 'update':
+          case 'update':
           result = await createOrUpdateObject(req, Model, true);
           res.status(200).json({
             status: 'success',

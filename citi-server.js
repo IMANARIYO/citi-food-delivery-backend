@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(cors());
 const swaggerDocument = yaml.load("./documentationfile.yaml");
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-app.use("/",mainRouter)
+app.use("/citi_api/v1",mainRouter)
 app.use('*',badroutes)
 app.use(errosingeneral)
 app.use((req, res) => {

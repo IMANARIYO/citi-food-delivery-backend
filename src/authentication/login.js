@@ -3,7 +3,7 @@ import { passComparer, passHashing, tokengenerating } from "../utils/index.js";
 
 export const login = async (req, res) => {
   try {
-    // console.log(req.body.email);
+     console.log(req.body.email,"from login-----------------------");
     let user = await User.findOne({ email: req.body.email })
     if (user) {
       let istruepassword = await passComparer(req.body.password, user.password)

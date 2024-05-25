@@ -5,7 +5,7 @@ const paymentSchema = new mongoose.Schema({
   orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order' },
    subscriptionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Subscription' },
   amount: { type: Number, required: true },
-  currency: { type: String, default: 'USD' },
+  currency: { type: String, default: 'frw' },
   paymentMethod: { type: String, required: true },
   transactionId: { type: String, required: true },
   status: { type: String, default: 'pending' },

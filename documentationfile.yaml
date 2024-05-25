@@ -10,7 +10,7 @@ info:
     url: "tel:0787795163"
 servers:
   - url: http://localhost:2222
-  - url: https://
+  - url: https://citi-food-delivery-backend-api.onrender.com
     description: Local development server
 components:
   securitySchemes:
@@ -18,7 +18,80 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-  schemas:
+  schemas:  
+    AddToCartRequest:
+      type: object
+      properties:
+        itemId:
+          type: string
+          description: ID of the item to add to the cart
+        quantity:
+          type: integer
+          description: Quantity of the item
+    UpdateCartRequest:
+      type: object
+      properties:
+        itemId:
+          type: string
+          description: ID of the item to update in the cart
+        quantity:
+          type: integer
+          description: New quantity of the item
+    RemoveFromCartRequest:
+      type: object
+      properties:
+        itemId:
+          type: string
+          description: ID of the item to remove from the cart
+    CheckoutRequest:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: ID of the user
+    Cart:
+      type: object
+      properties:
+        userId:
+          type: string
+        foodItems:
+          type: array
+          items:
+            type: object
+            properties:
+              foodItem:
+                type: string
+              quantity:
+                type: integer
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        email:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              foodItem:
+                type: string
+              quantity:
+                type: integer
+        totalPrice:
+          type: number
+        status:
+          type: string
+          default: pending
+        customerPhone:
+          type: string
+        driverphone:
+          type: string
+        paymentId:
+          type: string  
     Payment:
       type: object
       properties:
@@ -84,31 +157,7 @@ components:
         updatedAt:
           type: string
           format: date-time
-          description: Date and time when the review was last updated
-    AddToCartRequest:
-      type: object
-      properties:
-        itemId:
-          type: string
-          description: ID of the item to add to the cart
-        quantity:
-          type: integer
-          description: Quantity of the item
-    UpdateCartRequest:
-      type: object
-      properties:
-        itemId:
-          type: string
-          description: ID of the item to update in the cart
-        quantity:
-          type: integer
-          description: New quantity of the item
-    RemoveFromCartRequest:
-      type: object
-      properties:
-        itemId:
-          type: string
-          description: ID of the item to remove from the cart
+          description: Date and time when the review was last updated  
     FoodItem:
       type: object
       properties:
@@ -191,9 +240,54 @@ components:
           type: string
           format: date-time
           description: Date and time when the notification was last updated
-    
+    User:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: "60d0fe4f5311236168a109ca"
+        fullNames:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          example: "john.doe@example.com"
+        picture:
+          type: string
+          example: "url_to_profile_picture"
+        password:
+          type: string
+          example: "hashedpassword"
+        gender:
+          type: string
+          example: "Male"
+        role:
+          type: string
+          example: "user"
+        otpExpiresAt:
+          type: string
+          example: "2023-12-31T23:59:59Z"
+        otp:
+          type: string
+          example: "123456"
+        token:
+          type: string
+          example: "jwt_token"
+        verified:
+          type: boolean
+          example: true
+        location:
+          type: string
+          example: "City, Country"
+        phoneNumber:
+          type: string
+          example: "1234567890"
+        delivelinglocation:
+          type: string
+          example: "New Delivery Location"
+
 paths:
-  /auth/deleteUserById/{id}:
+  /citi_api/v1/auth/deleteUserById/{id}:
     delete:
       summary: "Delete a user by ID"
       tags:
@@ -232,8 +326,7 @@ paths:
                     example: "User not found"
         '500':
           description: "Internal Server Error"         
-
-  /auth/signup:
+  /citi_api/v1/auth/signup:
     post:
       summary: User Signup
       tags: [authentication]
@@ -278,8 +371,7 @@ paths:
           description: User registered successfully
         '500':
           description: Internal Server Error
-
-  /auth/login:
+  /citi_api/v1/auth/login:
     post:
       summary: User Login
       tags: [authentication]
@@ -306,8 +398,7 @@ paths:
           description: Unauthorized - Invalid credentials
         '500':
           description: Internal Server Error
-
-  /auth/forget:
+  /citi_api/v1/auth/forget:
     post:
       summary: Generate and Send OTP for Password Reset
       tags: [authentication]
@@ -330,8 +421,7 @@ paths:
           description: User not found
         '500':
           description: Internal Server Error
-
-  /auth/reset:
+  /citi_api/v1/auth/reset:
     post:
       summary: Verify OTP and Update Password
       tags: [authentication]
@@ -364,8 +454,7 @@ paths:
           description: Unauthorized - Invalid OTP
         '500':
           description: Internal Server Error
-
-  /auth/change:
+  /citi_api/v1/auth/change:
     post:
       summary: Change Password (Authenticated Route)
       tags: [authentication]
@@ -399,8 +488,7 @@ paths:
           description: Unauthorized - Invalid token
         '500':
           description: Internal Server Error
-
-  /auth/getAllUsers:
+  /citi_api/v1/auth/getAllUsers:
     get:
       summary: 'Get all users'
       tags:
@@ -414,9 +502,1341 @@ paths:
             application/json:
               schema:
                 type: object
+  /citi_api/v1/auth/maketheadminasuser/{id}:
+    patch:
+      summary: Revoke admin role from a user
+      tags: [authentication]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the user to be reverted to user role
+      responses:
+        '200':
+          description: User updated successfully and is user by role now
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User updated successfully and is user by role now
+                  # data:
+                  #   $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/auth/updateDeliveryLocation:
+    patch:
+      summary: Update the delivery location of a user
+      tags: [authentication]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - delivelinglocation
+              properties:
+                delivelinglocation:
+                  type: string
+                  example: "New Delivery Location"
+      responses:
+        '200':
+          description: Delivery location updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Delivery location updated successfully
+                  data:
+                    $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+        '400':
+          description: Delivery location is required
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/auth/addadminbyid/{id}:
+    patch:
+      summary: Grant admin role to a user
+      tags: [authentication]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the user to be granted admin role
+      responses:
+        '200':
+          description: User updated successfully and is admin now
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User updated successfully and is admin now
+                  data:
+                    $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/auth/updateUserById/{id}:
+    patch:
+      summary: Update a user by ID
+      tags: [authentication]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the user to be updated
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullNames:
+                  type: string
+                  example: "John Doe"
+                email:
+                  type: string
+                  example: "john.doe@example.com"
+                picture:
+                  type: string
+                  example: "url_to_profile_picture"
+                password:
+                  type: string
+                  example: "newpassword123"
+                gender:
+                  type: string
+                  example: "Male"
+                role:
+                  type: string
+                  example: "user"
+                otpExpiresAt:
+                  type: string
+                  example: "2023-12-31T23:59:59Z"
+                otp:
+                  type: string
+                  example: "123456"
+                token:
+                  type: string
+                  example: "jwt_token"
+                verified:
+                  type: boolean
+                  example: true
+                location:
+                  type: string
+                  example: "City, Country"
+                phoneNumber:
+                  type: string
+                  example: "1234567890"
+                delivelinglocation:
+                  type: string
+                  example: "New Delivery Location"
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User updated successfully
+                  data:
+                    $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/weeklymenu/create:
+    post:
+      tags:
+        - "Weekly Menu"
+      summary: "Create a new weekly menu item"
+      consumes:
+        - "application/json"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                day:
+                  type: "string"
+                  description: "Day of the week (e.g., Sunday, Monday, Tuesday)"
+                  example: "Monday"
+                foodItems:
+                  type: "array"
+                  items:
+                    type: "string"
+                  description: "List of food item IDs"
+                  example: ["123", "456", "789"]
+      responses:
+        201:
+          description: "Successfully created a new weekly menu item"
+        400:
+          description: "Bad request. Please check the request parameters."
 
- 
-  
+  /citi_api/v1/weeklymenu/get:
+    get:
+      tags:
+        - "Weekly Menu"
+      summary: "Get all weekly menu items"
+      responses:
+        200:
+          description: "Successfully retrieved all weekly menu items"
+  /citi_api/v1/weeklymenu/get/{id}:
+    get:
+      tags:
+        - "Weekly Menu"
+      summary: "Get a weekly menu item by ID"
+      parameters:
+        - in: "path"
+          name: "id"
+          required: true
+          type: "string"
+          description: "ID of the weekly menu item to retrieve"
+      responses:
+        200:
+          description: "Successfully retrieved the weekly menu item"
+        404:
+          description: "Weekly menu item not found"
+  /citi_api/v1/weeklymenu/edit/{id}:
+    put:
+      tags:
+        - "Weekly Menu"
+      summary: "Update a weekly menu item by ID"
+      consumes:
+        - "application/json"
+      parameters:
+        - in: "path"
+          name: "id"
+          required: true
+          type: "string"
+          description: "ID of the weekly menu item to update"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                day:
+                  type: "string"
+                  description: "Day of the week (e.g., Sunday, Monday, Tuesday)"
+                  example: "Monday"
+                foodItems:
+                  type: "array"
+                  items:
+                    type: "string"
+                  description: "List of food item IDs"
+                  example: ["123", "456", "789"]
+      responses:
+        200:
+          description: "Successfully updated the weekly menu item"
+        400:
+          description: "Bad request. Please check the request parameters."
+        404:
+          description: "Weekly menu item not found"
+
+  /citi_api/v1/weeklymenu/delete/{id}:
+    delete:
+      tags:
+        - "Weekly Menu"
+      summary: "Delete a weekly menu item by ID"
+      parameters:
+        - in: "path"
+          name: "id"
+          required: true
+          type: "string"
+          description: "ID of the weekly menu item to delete"
+      responses:
+        200:
+          description: "Successfully deleted the weekly menu item"
+        404:
+          description: "Weekly menu item not found"
+  /citi_api/v1/cart/add-to-cart/{foodItemId}:
+    post:
+      summary: Add an item to the cart
+      tags:
+        - Cart
+      security:
+       - bearerAuth: []  
+      parameters:
+        - in: path
+          name: foodItemId
+          schema:
+            type: string
+          required: true
+          description: ID of the food item to add to the cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddToCartRequest'
+      responses:
+        '200':
+          description: Item added to the cart successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+  /citi_api/v1/cart/update-cart/{foodItemId}:
+    put:
+      summary: Update the quantity of an item in the cart
+      tags:
+        - Cart
+      security:
+         - bearerAuth: []
+      parameters:
+        - in: path
+          name: foodItemId
+          schema:
+            type: string
+          required: true
+          description: ID of the food item to update in the cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCartRequest'
+      responses:
+        '200':
+          description: Cart updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+  /citi_api/v1/cart/remove-from-cart/{foodItemId}:
+    delete:
+      summary: Remove an item from the cart
+      tags:
+        - Cart
+      security:
+       - bearerAuth: []  
+      parameters:
+        - in: path
+          name: foodItemId
+          schema:
+            type: string
+          required: true
+          description: ID of the food item to remove from the cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemoveFromCartRequest'
+      responses:
+        '200':
+          description: Item removed from the cart successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+  /citi_api/v1/cart/checkout:
+    post:
+      summary: Checkout and create an order
+      tags:
+        - Cart
+      security:
+       - bearerAuth: []  
+    
+      responses:
+        '200':
+          description: Order placed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+  /citi_api/v1/order/create-order:
+    post:
+      summary: Create a new order
+      tags:
+        - Order
+      security:
+        - bearerAuth: []
+      description: Endpoint to create a new order.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      responses:
+        '201':
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Order created successfully
+                  data:
+                    $ref: '#/components/schemas/Order'
+  /citi_api/v1/order/get-order:
+    get:
+      summary: Get all orders
+      tags:
+        - Order
+      security:
+        - bearerAuth: []
+      description: Endpoint to retrieve all orders.
+      responses:
+        '200':
+          description: Successfully retrieved all orders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: All orders retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+  /citi_api/v1/order/get-order-by-id/{id}:
+    get:
+      summary: Get an order by ID
+      tags:
+        - Order
+      security:
+        - bearerAuth: []
+      description: Endpoint to retrieve an order by ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the order to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved order by ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Order retrieved successfully
+                  data:
+                    $ref: '#/components/schemas/Order'
+  /citi_api/v1/order/edit-order-by-id/{id}:
+    put:
+      summary: Update an order by ID
+      tags:
+        - Order
+      security:
+        - bearerAuth: []
+      description: Endpoint to update an order by ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the order to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      responses:
+        '200':
+          description: Order updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Order updated successfully
+                  data:
+                    $ref: '#/components/schemas/Order'
+  /citi_api/v1/order/delete-order-by-id/{id}:
+    delete:
+      summary: Delete an order by ID
+      tags:
+        - Order
+      security:
+        - bearerAuth: []
+      description: Endpoint to delete an order by ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the order to delete
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Order deleted successfully
+                  data:
+                    type: null
+  /citi_api/v1/category/create:
+      post:
+       summary: Create a new category
+       tags: 
+         - Category
+       security:
+         - bearerAuth: []
+       requestBody:
+         required: true
+         content:
+           multipart/form-data:
+             schema:
+               type: object
+               properties:
+                 name:
+                   type: string
+                   example: "Beverages"
+                 image:
+                   type: string
+                   format: binary
+       responses:
+         '201':
+           description: Category created successfully
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/Category'
+         '500':
+           description: Internal Server Error
+  /citi_api/v1/category/get:
+     get:
+       summary: Get all categories
+       tags:
+         - Category
+       security:
+        - bearerAuth: []  
+       responses:
+         '200':
+           description: All categories retrieved successfully
+           content:
+             application/json:
+               schema:
+                 type: array
+                 items:
+                   $ref: '#/components/schemas/Category'
+         '500':
+           description: Internal Server Error
+  /citi_api/v1/category/get/{id}:
+     get:
+       summary: Get a category by ID
+       tags:
+         - Category
+       security:
+        - bearerAuth: []  
+       parameters:
+         - name: id
+           in: path
+           required: true
+           schema:
+             type: string
+           description: ID of the category to retrieve
+       responses:
+         '200':
+           description: Successfully retrieved category
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/Category'
+         '404':
+           description: Category not found
+           content:
+             application/json:
+               schema:
+                 type: object
+                 properties:
+                   message:
+                     type: string
+                     example: Category not found
+         '500':
+           description: Internal Server Error
+  /citi_api/v1/category/edit/{id}:
+     put:
+       summary: Update a category by ID
+       tags:
+         - Category
+       security:
+        - bearerAuth: []  
+       parameters:
+         - name: id
+           in: path
+           required: true
+           schema:
+             type: string
+           description: ID of the category to update
+       requestBody:
+         required: true
+         content:
+           multipart/form-data:
+             schema:
+               type: object
+               properties:
+                 name:
+                   type: string
+                   example: "Beverages"
+                 image:
+                   type: string
+                   format: binary
+       responses:
+         '200':
+           description: Category updated successfully
+           content:
+             application/json:
+               schema:
+                 $ref: '#/components/schemas/Category'
+         '404':
+           description: Category not found
+           content:
+             application/json:
+               schema:
+                 type: object
+                 properties:
+                   message:
+                     type: string
+                     example: Category not found
+         '500':
+           description: Internal Server Error
+  /citi_api/v1/category/delete/{id}:
+     delete:
+       summary: Delete a category by ID
+       tags:
+         - Category
+       security:
+        - bearerAuth: []  
+       parameters:
+         - name: id
+           in: path
+           required: true
+           schema:
+             type: string
+           description: ID of the category to delete
+       responses:
+         '200':
+           description: Category deleted successfully
+           content:
+             application/json:
+               schema:
+                 type: object
+                 properties:
+                   status:
+                     type: string
+                     example: success
+                   message:
+                     type: string
+                     example: Category deleted successfully
+         '404':
+           description: Category not found
+           content:
+             application/json:
+               schema:
+                 type: object
+                 properties:
+                   message:
+                     type: string
+                     example: Category not found
+         '500':
+           description: Internal Server Error  
+  /citi_api/v1/fooditem/create:
+    post:
+      summary: Create a new food item
+      tags: [fooditem]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Pizza"
+                image:
+                  type: string
+                  format: binary
+                category:
+                  type: array
+                  items:
+                    type: string
+                price:
+                  type: number
+                  example: 9.99
+                description:
+                  type: string
+                  example: "Delicious pizza with fresh ingredients"
+                availableDays:
+                  type: array
+                  items:
+                    type: string
+                  example: ["Monday", "Wednesday"]
+                time:
+                  type: string
+                  example: "18:00-22:00"
+      responses:
+        '201':
+          description: Food item created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodItem'
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/fooditem/get:
+    get:
+      summary: Get all food items
+      tags: [fooditem]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved all food items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FoodItem'
+  /citi_api/v1/fooditem/all-food-item-forcategoryid/{categoryId}:
+     get:
+       summary: Retrieve all food items by category ID
+       tags: 
+         - fooditem
+       security:
+         - bearerAuth: []
+       parameters:
+         - in: path
+           name: categoryId
+           required: true
+           schema:
+             type: string
+           description: ID of the category to filter food items
+       responses:
+         '200':
+           description: Successfully retrieved all food items by category
+           content:
+             application/json:
+               schema:
+                 type: array
+                 items:
+                   $ref: '#/components/schemas/FoodItem'
+  /citi_api/v1/fooditem/get/{id}:
+    get:
+      summary: Get a food item by ID
+      tags: [fooditem]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "60fe5b6d2fba530015d48414"
+      responses:
+        '200':
+          description: Successfully retrieved food item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodItem'
+        '404':
+          description: Food item not found
+  /citi_api/v1/fooditem/edit/{id}:
+    put:
+      summary: Update a food item by ID
+      tags: [fooditem]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "60fe5b6d2fba530015d48414"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Pizza"
+                image:
+                  type: string
+                  format: binary
+                category:
+                  type: array
+                  items:
+                    type: string
+                price:
+                  type: number
+                  example: 9.99
+                description:
+                  type: string
+                  example: "Delicious pizza with fresh ingredients"
+                availableDays:
+                  type: array
+                  items:
+                    type: string
+                  example: ["Monday", "Wednesday"]
+                time:
+                  type: string
+                  example: "18:00-22:00"
+      responses:
+        '200':
+          description: Food item updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FoodItem'
+        '404':
+          description: Food item not found
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/fooditem/delete/{id}:
+    delete:
+      summary: Delete a food item by ID
+      tags: [fooditem]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "60fe5b6d2fba530015d48414"
+      responses:
+        '200':
+          description: Food item deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Food item deleted successfully"
+        '404':
+          description: Food item not found
+        '500':
+          description: Internal Server Error
+
+  /citi_api/v1/favorite/create:
+    post:
+      summary: Create a new favorite
+      tags:
+        - favorite
+      security:
+        - bearerAuth: []
+      description: Create a new favorite entry for a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  description: The ID of the user
+                foodItem:
+                  type: string
+                  description: The ID of the food item
+              required:
+                - userId
+                - foodItem
+      responses:
+        '200':
+          description: Successfully created favorite
+        '400':
+          description: Invalid request body
+  /citi_api/v1/favorite/get/:
+    get:
+      summary: Get all favorites
+      tags:
+        - favorite
+      security:
+        - bearerAuth: []  
+      description: Retrieve all favorite entries for a user
+
+      responses:
+        '200':
+          description: Successfully retrieved favorites
+  /citi_api/v1/favorite/get/{id}:
+    get:
+      summary: Get favorite by ID
+      tags:
+        - favorite
+      security:
+        - bearerAuth: []  
+      description: Retrieve a favorite entry by its ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: The ID of the favorite entry
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved favorite
+        '404':
+          description: Favorite not found
+  /citi_api/v1/favorite/edit/{id}:
+    put:
+      summary: Update favorite by ID
+      tags:
+        - favorite
+      security:
+        - bearerAuth: []  
+      description: Update a favorite entry by its ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: The ID of the favorite entry
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  description: The ID of the user
+                foodItem:
+                  type: string
+                  description: The ID of the food item
+              required:
+                - userId
+                - foodItem
+      responses:
+        '200':
+          description: Successfully updated favorite
+        '400':
+          description: Invalid request body
+        '404':
+          description: Favorite not found
+  /citi_api/v1/favorite/delete/{id}:
+    delete:
+      summary: Delete favorite by ID
+      tags:
+        - favorite
+      security:
+        - bearerAuth: []  
+      description: Delete a favorite entry by its ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: The ID of the favorite entry
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully deleted favorite
+        '404':
+          description: Favorite not found
+  /citi_api/v1/notification/create:
+    post:
+      summary: Create a new notification
+      tags: 
+        - Notification
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notification'
+      responses:
+        '201':
+          description: Notification created successfully
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/notification/get:
+    get:
+      summary: Get all notifications
+      tags: 
+        - Notification
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Notifications retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/notification/get/{id}:
+    get:
+      summary: Get a notification by ID
+      tags: 
+        - Notification
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the notification to retrieve
+      responses:
+        '200':
+          description: Notification retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+        '404':
+          description: Notification not found
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/notification/edit/{id}:
+    put:
+      summary: Update a notification by ID
+      tags: 
+        - Notification
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the notification to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notification'
+      responses:
+        '200':
+          description: Notification updated successfully
+        '404':
+          description: Notification not found
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/notification/delete/{id}:
+    delete:
+      summary: Delete a notification by ID
+      tags: 
+        - Notification
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the notification to delete
+      responses:
+        '200':
+          description: Notification deleted successfully
+        '404':
+          description: Notification not found
+        '500':
+          description: Internal Server Error 
+  /citi_api/v1/payment/payfororder/{orderId}:
+    post:
+      summary: Make a payment for an order
+      tags: 
+        - Payment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the order to make payment for
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payment'
+      responses:
+        '201':
+          description: Payment successful
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/payment/get/{id}:
+    get:
+      summary: Get a payment by ID
+      tags: 
+        - Payment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the payment to retrieve
+      responses:
+        '200':
+          description: Payment retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '404':
+          description: Payment not found
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/payment/get:
+    get:
+      summary: Get all payments
+      tags: 
+        - Payment
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Payments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Payment'
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/payment/edit/{id}:
+    put:
+      summary: Update a payment by ID
+      tags: 
+        - Payment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the payment to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Payment'
+      responses:
+        '200':
+          description: Payment updated successfully
+        '404':
+          description: Payment not found
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/payment/delete/{id}:
+    delete:
+      summary: Delete a payment by ID
+      tags: 
+        - Payment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the payment to delete
+      responses:
+        '200':
+          description: Payment deleted successfully
+        '404':
+          description: Payment not found
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/review/create-review/foodItem:
+    post:
+      summary: Create a review for a food item
+      tags: 
+        - Review
+      security:
+        - bearerAuth: []  
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+      responses:
+        '201':
+          description: Review created successfully
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/review/reviews/{id}:
+    get:
+      summary: Get all reviews for a specific food item
+      tags: 
+        - Review
+      security:
+        - bearerAuth: []  
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the food item to get reviews for
+      responses:
+        '200':
+          description: Reviews retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Review'
+        '404':
+          description: Reviews not found
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/review/{id}:
+    put:
+      summary: Update a review by ID
+      tags: 
+        - Review
+      security:
+        - bearerAuth: []  
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the review to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Review'
+      responses:
+        '200':
+          description: Review updated successfully
+        '404':
+          description: Review not found
+        '500':
+          description: Internal Server Error
+
+    delete:
+      summary: Delete a review by ID
+      tags: 
+        - Review
+      security:
+        - bearerAuth: []  
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the review to delete
+      responses:
+        '200':
+          description: Review deleted successfully
+        '404':
+          description: Review not found
+        '500':
+          description: Internal Server Error
   /partner/createPartner:
     post:
       summary: Create a new partner
@@ -894,848 +2314,4 @@ paths:
                       dateSent:
                         type: string
                         example: "2023-07-26T14:29:09.282Z"
-  /category/create:
-      post:
-       summary: Create a new category
-       tags: 
-         - Category
-       security:
-         - bearerAuth: []
-       requestBody:
-         required: true
-         content:
-           multipart/form-data:
-             schema:
-               type: object
-               properties:
-                 name:
-                   type: string
-                   example: "Beverages"
-                 image:
-                   type: string
-                   format: binary
-       responses:
-         '201':
-           description: Category created successfully
-           content:
-             application/json:
-               schema:
-                 $ref: '#/components/schemas/Category'
-         '500':
-           description: Internal Server Error
-  /category/get:
-     get:
-       summary: Get all categories
-       tags:
-         - Category
-       security:
-        - bearerAuth: []  
-       responses:
-         '200':
-           description: All categories retrieved successfully
-           content:
-             application/json:
-               schema:
-                 type: array
-                 items:
-                   $ref: '#/components/schemas/Category'
-         '500':
-           description: Internal Server Error
-  /category/get/{id}:
-     get:
-       summary: Get a category by ID
-       tags:
-         - Category
-       security:
-        - bearerAuth: []  
-       parameters:
-         - name: id
-           in: path
-           required: true
-           schema:
-             type: string
-           description: ID of the category to retrieve
-       responses:
-         '200':
-           description: Successfully retrieved category
-           content:
-             application/json:
-               schema:
-                 $ref: '#/components/schemas/Category'
-         '404':
-           description: Category not found
-           content:
-             application/json:
-               schema:
-                 type: object
-                 properties:
-                   message:
-                     type: string
-                     example: Category not found
-         '500':
-           description: Internal Server Error
-  /category/edit/{id}:
-     put:
-       summary: Update a category by ID
-       tags:
-         - Category
-       security:
-        - bearerAuth: []  
-       parameters:
-         - name: id
-           in: path
-           required: true
-           schema:
-             type: string
-           description: ID of the category to update
-       requestBody:
-         required: true
-         content:
-           multipart/form-data:
-             schema:
-               type: object
-               properties:
-                 name:
-                   type: string
-                   example: "Beverages"
-                 image:
-                   type: string
-                   format: binary
-       responses:
-         '200':
-           description: Category updated successfully
-           content:
-             application/json:
-               schema:
-                 $ref: '#/components/schemas/Category'
-         '404':
-           description: Category not found
-           content:
-             application/json:
-               schema:
-                 type: object
-                 properties:
-                   message:
-                     type: string
-                     example: Category not found
-         '500':
-           description: Internal Server Error
-  /category/delete/{id}:
-     delete:
-       summary: Delete a category by ID
-       tags:
-         - Category
-       security:
-        - bearerAuth: []  
-       parameters:
-         - name: id
-           in: path
-           required: true
-           schema:
-             type: string
-           description: ID of the category to delete
-       responses:
-         '200':
-           description: Category deleted successfully
-           content:
-             application/json:
-               schema:
-                 type: object
-                 properties:
-                   status:
-                     type: string
-                     example: success
-                   message:
-                     type: string
-                     example: Category deleted successfully
-         '404':
-           description: Category not found
-           content:
-             application/json:
-               schema:
-                 type: object
-                 properties:
-                   message:
-                     type: string
-                     example: Category not found
-         '500':
-           description: Internal Server Error  
-  /fooditem/create:
-    post:
-      summary: Create a new food item
-      tags: [fooditem]
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                  example: "Pizza"
-                image:
-                  type: string
-                  format: binary
-                category:
-                  type: array
-                  items:
-                    type: string
-                price:
-                  type: number
-                  example: 9.99
-                description:
-                  type: string
-                  example: "Delicious pizza with fresh ingredients"
-                availableDays:
-                  type: array
-                  items:
-                    type: string
-                  example: ["Monday", "Wednesday"]
-                time:
-                  type: string
-                  example: "18:00-22:00"
-      responses:
-        '201':
-          description: Food item created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FoodItem'
-        '500':
-          description: Internal Server Error
-
-  /fooditem/get:
-    get:
-      summary: Get all food items
-      tags: [fooditem]
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Successfully retrieved all food items
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/FoodItem'
-
-  /fooditem/get/{id}:
-    get:
-      summary: Get a food item by ID
-      tags: [fooditem]
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            example: "60fe5b6d2fba530015d48414"
-      responses:
-        '200':
-          description: Successfully retrieved food item
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FoodItem'
-        '404':
-          description: Food item not found
-
-  /fooditem/edit/{id}:
-    put:
-      summary: Update a food item by ID
-      tags: [fooditem]
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            example: "60fe5b6d2fba530015d48414"
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                  example: "Pizza"
-                image:
-                  type: string
-                  format: binary
-                category:
-                  type: array
-                  items:
-                    type: string
-                price:
-                  type: number
-                  example: 9.99
-                description:
-                  type: string
-                  example: "Delicious pizza with fresh ingredients"
-                availableDays:
-                  type: array
-                  items:
-                    type: string
-                  example: ["Monday", "Wednesday"]
-                time:
-                  type: string
-                  example: "18:00-22:00"
-      responses:
-        '200':
-          description: Food item updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FoodItem'
-        '404':
-          description: Food item not found
-        '500':
-          description: Internal Server Error
-
-  /fooditem/delete/{id}:
-    delete:
-      summary: Delete a food item by ID
-      tags: [fooditem]
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            example: "60fe5b6d2fba530015d48414"
-      responses:
-        '200':
-          description: Food item deleted successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Food item deleted successfully"
-        '404':
-          description: Food item not found
-        '500':
-          description: Internal Server Error
-  /favorite/create:
-    post:
-      summary: Create a new favorite
-      tags:
-        - favorite
-      security:
-        - bearerAuth: []
-      description: Create a new favorite entry for a user
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                userId:
-                  type: string
-                  description: The ID of the user
-                foodItem:
-                  type: string
-                  description: The ID of the food item
-              required:
-                - userId
-                - foodItem
-      responses:
-        '200':
-          description: Successfully created favorite
-        '400':
-          description: Invalid request body
-
-  /favorite/get/:
-    get:
-      summary: Get all favorites
-      tags:
-        - favorite
-      security:
-        - bearerAuth: []  
-      description: Retrieve all favorite entries for a user
-
-      responses:
-        '200':
-          description: Successfully retrieved favorites
-
-  /favorite/get/{id}:
-    get:
-      summary: Get favorite by ID
-      tags:
-        - favorite
-      security:
-        - bearerAuth: []  
-      description: Retrieve a favorite entry by its ID
-      parameters:
-        - in: path
-          name: id
-          required: true
-          description: The ID of the favorite entry
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successfully retrieved favorite
-        '404':
-          description: Favorite not found
-
-  /favorite/edit/{id}:
-    put:
-      summary: Update favorite by ID
-      tags:
-        - favorite
-      security:
-        - bearerAuth: []  
-      description: Update a favorite entry by its ID
-      parameters:
-        - in: path
-          name: id
-          required: true
-          description: The ID of the favorite entry
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                userId:
-                  type: string
-                  description: The ID of the user
-                foodItem:
-                  type: string
-                  description: The ID of the food item
-              required:
-                - userId
-                - foodItem
-      responses:
-        '200':
-          description: Successfully updated favorite
-        '400':
-          description: Invalid request body
-        '404':
-          description: Favorite not found
-
-  /favorite/delete/{id}:
-    delete:
-      summary: Delete favorite by ID
-      tags:
-        - favorite
-      security:
-        - bearerAuth: []  
-      description: Delete a favorite entry by its ID
-      parameters:
-        - in: path
-          name: id
-          required: true
-          description: The ID of the favorite entry
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successfully deleted favorite
-        '404':
-          description: Favorite not found
-
-  /cart/add-to-cart:
-    post:
-      summary: Add an item to the cart
-      tags: 
-        - Cart
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AddToCartRequest'
-      responses:
-        '200':
-          description: Item added to the cart successfully
-        '500':
-          description: Internal Server Error
-
-  /cart/update-cart:
-    put:
-      summary: Update item quantity in the cart
-      tags: 
-        - Cart
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateCartRequest'
-      responses:
-        '200':
-          description: Cart updated successfully
-        '500':
-          description: Internal Server Error
-
-  /cart/remove-from-cart:
-    delete:
-      summary: Remove an item from the cart
-      tags: 
-        - Cart
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RemoveFromCartRequest'
-      responses:
-        '200':
-          description: Item removed from the cart successfully
-        '500':
-          description: Internal Server Error
-  /notification/create:
-    post:
-      summary: Create a new notification
-      tags: 
-        - Notification
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Notification'
-      responses:
-        '201':
-          description: Notification created successfully
-        '500':
-          description: Internal Server Error
-
-  /notification/get:
-    get:
-      summary: Get all notifications
-      tags: 
-        - Notification
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Notifications retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Notification'
-        '500':
-          description: Internal Server Error
-
-  /notification/get/{id}:
-    get:
-      summary: Get a notification by ID
-      tags: 
-        - Notification
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID of the notification to retrieve
-      responses:
-        '200':
-          description: Notification retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Notification'
-        '404':
-          description: Notification not found
-        '500':
-          description: Internal Server Error
-
-  /notification/edit/{id}:
-    put:
-      summary: Update a notification by ID
-      tags: 
-        - Notification
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID of the notification to update
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Notification'
-      responses:
-        '200':
-          description: Notification updated successfully
-        '404':
-          description: Notification not found
-        '500':
-          description: Internal Server Error
-
-  /notification/delete/{id}:
-    delete:
-      summary: Delete a notification by ID
-      tags: 
-        - Notification
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID of the notification to delete
-      responses:
-        '200':
-          description: Notification deleted successfully
-        '404':
-          description: Notification not found
-        '500':
-          description: Internal Server Error 
-  /payment/payfororder/{orderId}:
-    post:
-      summary: Make a payment for an order
-      tags: 
-        - Payment
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: orderId
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID of the order to make payment for
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Payment'
-      responses:
-        '201':
-          description: Payment successful
-        '500':
-          description: Internal Server Error
-
-  /payment/get/{id}:
-    get:
-      summary: Get a payment by ID
-      tags: 
-        - Payment
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID of the payment to retrieve
-      responses:
-        '200':
-          description: Payment retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Payment'
-        '404':
-          description: Payment not found
-        '500':
-          description: Internal Server Error
-
-  /payment/get:
-    get:
-      summary: Get all payments
-      tags: 
-        - Payment
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Payments retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Payment'
-        '500':
-          description: Internal Server Error
-
-  /payment/edit/{id}:
-    put:
-      summary: Update a payment by ID
-      tags: 
-        - Payment
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID of the payment to update
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Payment'
-      responses:
-        '200':
-          description: Payment updated successfully
-        '404':
-          description: Payment not found
-        '500':
-          description: Internal Server Error
-
-  /payment/delete/{id}:
-    delete:
-      summary: Delete a payment by ID
-      tags: 
-        - Payment
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID of the payment to delete
-      responses:
-        '200':
-          description: Payment deleted successfully
-        '404':
-          description: Payment not found
-        '500':
-          description: Internal Server Error
-  /review/create-review/foodItem:
-    post:
-      summary: Create a review for a food item
-      tags: 
-        - Review
-      security:
-        - bearerAuth: []  
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Review'
-      responses:
-        '201':
-          description: Review created successfully
-        '500':
-          description: Internal Server Error
-
-  /review/reviews/{id}:
-    get:
-      summary: Get all reviews for a specific food item
-      tags: 
-        - Review
-      security:
-        - bearerAuth: []  
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID of the food item to get reviews for
-      responses:
-        '200':
-          description: Reviews retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Review'
-        '404':
-          description: Reviews not found
-        '500':
-          description: Internal Server Error
-
-  /review/{id}:
-    put:
-      summary: Update a review by ID
-      tags: 
-        - Review
-      security:
-        - bearerAuth: []  
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID of the review to update
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Review'
-      responses:
-        '200':
-          description: Review updated successfully
-        '404':
-          description: Review not found
-        '500':
-          description: Internal Server Error
-
-    delete:
-      summary: Delete a review by ID
-      tags: 
-        - Review
-      security:
-        - bearerAuth: []  
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID of the review to delete
-      responses:
-        '200':
-          description: Review deleted successfully
-        '404':
-          description: Review not found
-        '500':
-          description: Internal Server Error
-    
+  

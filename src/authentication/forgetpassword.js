@@ -32,7 +32,7 @@ export const generateAndSendOTP = async (req, res) => {
 
 export const verifyOTPAndUpdatePassword = async (req, res) => {
   const userEmail = req.body.email
-  const user = awaitUser.findOne({ email: userEmail })
+  const user = await User.findOne({ email: userEmail })
   if (!user) {
     return res.status(404).json({
       message: `No user with email ${userEmail} found. Please use a correct registered email if you have ever signed up.`

@@ -1,12 +1,21 @@
 import Cart from "../models/Cart.js";
+import Notification from "../models/Notification.js";
 import Order from "../models/Order.js";
 
-// Additional imports
+// Utility function to calculate total price
+const calculateTotalPrice = (items) => {
+  return items.reduce((total, item) => {
+    return total + item.foodItem.price * item.quantity;
+  }, 0);
+};
+
 
 // Handler function to add or update items in the cart
 export const addToCartHandler = async (req, res, next) => {
   try {
-    const { userId, foodItemId, quantity } = req.body;
+    let userId=req.userId;
+    let foodItemId=req.params.foodItemId;
+    const { quantity } = req.body;
     let cart = await Cart.findOne({ userId });
 
     if (!cart) {
@@ -93,7 +102,8 @@ export const removeFromCartHandler = async (req, res, next) => {
 // Handler function to checkout and create an order
 export const checkoutHandler = async (req, res, next) => {
   try {
-    const { userId } = req.body;
+    let userId = req.userId 
+  
 
     // Find the user's cart
     const cart = await Cart.findOne({ userId }).populate('foodItems.foodItem');
@@ -107,6 +117,7 @@ export const checkoutHandler = async (req, res, next) => {
 
     // Create a new order based on the cart contents
     const order = new Order({
+      delivelinglocation:req.user.delivelinglocation,
       userId: cart.userId,
       email: req.user.email, // Assuming user's email is stored in req.user.email
       items: cart.foodItems.map(item => ({
@@ -121,11 +132,22 @@ export const checkoutHandler = async (req, res, next) => {
 
     // Clear the user's cart
     await Cart.findOneAndDelete({ userId });
+     // Create a notification for the new order
+     const notification = new Notification({
+      orderId: order._id,
+      userId: req.userId,
+      status: 'unread',
+      message: `New order placed for ${totalPrice}`,
+    });
+
+    // Save the notification to the database
+    await notification.save();
 
     res.status(200).json({
       status: 'success',
-      message: 'Order placed successfully',
-      data: order,
+      message: 'Order placed successfully and corresiponding notification made successsfull',
+      order: order,
+      notification :notification 
     });
   } catch (error) {
     next(error);
