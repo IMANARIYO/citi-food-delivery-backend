@@ -9,7 +9,7 @@ const weeklyMenuSchema = new mongoose.Schema(
     },
     foodItems: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'FoodItem',
+      ref: 'foodItem',
       required: true
     }]
   },

@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+
 export const tokengenerating = payload => {
     console.log("-----the    process.env.JWT_EXP is ", process.env.JWT_EXP)
   let token = jwt.sign(payload, process.env.JWT_SECRET, {
@@ -22,7 +23,7 @@ if(!token){
         });
     }
     req.user=decoded.user
-    console.log("am from    verifying token",req.user.fullNames)
+  
     req.userId=decoded._id;
     req.userEmail=decoded.email
     next();

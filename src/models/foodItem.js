@@ -17,7 +17,7 @@ const foodItemSchema = new mongoose.Schema(
       ref: 'Review',
     }],
     rating: { type: Number },
-    time: { type: String, required: true }
+    time: { type: Number, required: true }
   },
   { timestamps: true }
 ).set('strictPopulate', false);

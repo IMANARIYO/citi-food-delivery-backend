@@ -4,6 +4,11 @@ const usersSchema = new mongoose.Schema({
     userId:{type: mongoose.Schema.Types.ObjectId},
     fullNames: {
         type: String,
+        required: false,
+
+    },
+    username: {
+        type: String,
         required: true
     },
     email: {
@@ -16,7 +21,7 @@ const usersSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    gender:{type:String},
+    gender:{type:String, required: false},
     role: {
         type: String,
         default:"user",
