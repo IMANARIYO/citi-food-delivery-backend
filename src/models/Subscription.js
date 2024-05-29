@@ -7,7 +7,7 @@ const subscriptionSchema = new mongoose.Schema({
   type: { type: String, enum: ['weekly', 'monthly'], required: true },
   amount: { type: Number, required: true },
   startDate: { type: Date, required: true },
-  endDate: { type: Date, required: true },
+  endDate: { type: Date, required: true }, 
   status: { type: String, default: 'active' },
   payment: {
     type: mongoose.Schema.Types.ObjectId,

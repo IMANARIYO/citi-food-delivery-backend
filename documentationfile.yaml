@@ -1399,7 +1399,31 @@ paths:
           description: Food item not found
         '500':
           description: Internal Server Error
-
+  /citi_api/v1/fooditem/search:
+    get:
+      summary: Search for food items
+      tags: [fooditem]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: keyword
+          required: true
+          schema:
+            type: string
+            example: "Pizza"
+          description: Keyword to search for in food items
+      responses:
+        '200':
+          description: Successfully retrieved search results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FoodItem'
+        '500':
+          description: Internal Server Error
   /citi_api/v1/favorite/create:
     post:
       summary: Create a new favorite

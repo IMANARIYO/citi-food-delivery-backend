@@ -560,3 +560,13 @@ export const updateModelHandler = Model => {
 export const deleteModelHandler = Model => {
   return handleModelOperation(Model, 'delete');
 };
+export const searchFoodItems = catchAsync(async (req, res, next) => {
+  const searchParams = req.query; // Extract search parameters from query string
+
+  const results = await foodItem.search(searchParams); // Use the static search method
+  res.status(200).json({
+    status: 'success',
+    results: results.length,
+    data: results
+  });
+});

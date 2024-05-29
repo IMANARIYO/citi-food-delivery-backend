@@ -6,6 +6,7 @@ import {
   createModelHandler,
   deleteModelHandler,
   readModelHandler,
+  searchFoodItems,
   updateModelHandler
 } from '../controllers/crud.js'
 
@@ -31,5 +32,5 @@ fooditemRouter.get('/all-food-item-forcategoryid/:categoryId', async (req, res, 
     next(error);
   }
 });
-
+fooditemRouter.get('/search', searchFoodItems);
 export default fooditemRouter

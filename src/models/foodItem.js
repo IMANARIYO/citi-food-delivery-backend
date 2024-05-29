@@ -9,6 +9,7 @@ const foodItemSchema = new mongoose.Schema(
       ref: 'Category',
       required: true
     }],
+    
     price: { type: Number, required: true },
     description: { type: String, required: true },
     availableDays: [{ type: String, required: true }],
@@ -34,6 +35,24 @@ foodItemSchema.methods.calculateRating = async function() {
   } else {
     this.rating = 0;
   }
+};
+// Static method for search functionality
+foodItemSchema.statics.search = async function(searchParams) {
+  const query = {};
+
+  if (searchParams.keyword) {
+    const keyword = searchParams.keyword;
+    query.$or = [
+      { name: { $regex: keyword, $options: 'i' } },
+      { description: { $regex: keyword, $options: 'i' } },
+      { 'category.name': { $regex: keyword, $options: 'i' } }
+    ];
+    console.log(category.name)
+  }
+
+  return await this.find(query)
+    .populate('category')
+    .populate('reviews');
 };
 
 const foodItem = mongoose.model('foodItem', foodItemSchema);
