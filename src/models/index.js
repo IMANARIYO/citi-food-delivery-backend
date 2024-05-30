@@ -20,5 +20,6 @@ export {
   Payment,
   Favorite,
   Cart,
-  Notification
+  Notification,
+  
 };

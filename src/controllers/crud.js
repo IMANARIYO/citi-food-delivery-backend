@@ -1,7 +1,10 @@
 import Category from "../models/Category.js";
 import Favorite from "../models/Favorite.js";
+import Notification from "../models/Notification.js";
 import Order from "../models/Order.js";
 import Payment from "../models/Payment.js";
+import Subscriber from "../models/subscribers.js";
+import Subscription from "../models/Subscription.js";
 import WeeklyMenu from "../models/WeeklyMenu.js";
 import dotenv from "dotenv";
 import foodItem from "../models/foodItem.js";
@@ -326,9 +329,6 @@ import { AppError, catchAsync } from "../middlewares/globaleerorshandling.js";
 //   return handleModelOperation(Model, 'delete');
 // };
 
-
-
-
 dotenv.config();
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -457,6 +457,60 @@ const createOrUpdateObject = async (req, Model, isUpdate = false) => {
 
       return payment;
     }
+
+    if(Model ===Subscription){
+if(req.body.type==='monthly'){
+  newObject.monthlyAmount=req.body.amount;
+  newObject.dailyprice=req.body.amount/30;
+}
+else if( req.body==='weekly'){
+  newObject.weeklyAmount=req.body.amount;
+  newObject.dailyprice=req.body.amount/7;
+}
+    }
+    if (Model === Subscriber) {
+      const subscriptionId = req.params.subscriptionId;
+      newObject.subscriptionId=subscriptionId;
+      const subscription = await Subscription.findById(subscriptionId);
+      if (!subscription) {
+        throw new AppError('Subscription not found', 404);
+      }
+ // Set start date to the current date if not provided
+ if (!newObject.startDate) {
+  newObject.startDate = new Date();
+}
+
+      newObject.amount = subscription.amount;
+     
+      newObject.type = subscription.type;
+      console.log("newObject.dailyprice",subscription.amount,subscription);
+      if (subscription.type === 'monthly') {
+        newObject.monthlyAmount = subscription.amount;
+        newObject.dailyprice = subscription.amount / 30;
+        newObject.endDate = new Date(newObject.startDate);
+        newObject.endDate.setDate(newObject.endDate.getDate() + 30);
+      } else if (subscription.type === 'weekly',subscription.amount) {
+        newObject.weeklyAmount = subscription.amount;
+        
+        newObject.dailyprice = subscription.amount / 7;
+        newObject.endDate = new Date(newObject.startDate);
+        newObject.endDate.setDate(newObject.endDate.getDate() + 7);
+      }
+      console.log(typeof(newObject.amount));
+      console.log(req.body.numberOfPeople);
+      console.log("numberof peapplle",newObject.numberOfPeople,"hello");
+      newObject.totalAmount = newObject.amount * newObject.numberOfPeople;
+
+
+
+      const notification = new Notification({
+        message: 'subscription made sbscription made succcessfully go and pay for stating.',
+        userId: userId,
+        status: 'unread',
+      });
+      await notification.save();
+    }
+
 
     return await Model.create(newObject);
   }
