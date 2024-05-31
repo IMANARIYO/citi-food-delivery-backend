@@ -10,4 +10,6 @@ paymentRouter.get('/get', readModelHandler(Payment));
 paymentRouter.put('/edit/:id', updateModelHandler(Payment));
 paymentRouter.delete('/delete/:id', deleteModelHandler(Payment));
 
+paymentRouter.post('/payforsubscription/:subscriptionId', createModelHandler(Payment));
+
 export default paymentRouter;

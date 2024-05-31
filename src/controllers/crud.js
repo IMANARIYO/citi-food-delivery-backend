@@ -566,6 +566,12 @@ const handleModelOperation = (Model, operation) => {
               message: `${Model.modelName} not found with ID: ${req.params.id}`,
             });
           }
+
+          // Update status to 'read' if the model is Notification
+  if (Model === Notification) {
+    readResult.status = 'read';
+    await readResult.save();
+  }
           res.status(200).json({
             status: 'success',
             message: `${Model.modelName} retrieved successfully`,

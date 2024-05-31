@@ -2032,7 +2032,9 @@ paths:
   /citi_api/v1/subscribe/subscribefor/{subscriptionId}:
     post:
       summary: Subscribe for a subscription
-      tags: [Subscriber]
+      tags: [subscribers]
+      security:
+        - bearerAuth: []
       parameters:
         - in: path
           name: subscriptionId
@@ -2058,6 +2060,8 @@ paths:
           description: Bad Request
         '500':
           description: Internal Server Error
+  
+  
   /citi_api/v1/subscribe/get-all:
     get:
       summary: Get all subscribers
@@ -2115,7 +2119,69 @@ paths:
         '500':
           description: Internal Server Error
   
-  
+  /citi_api/v1/subscribe/pay/{subscribId}:
+    post:
+      summary: Process payment for a subscription
+      tags: [subscribers]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: subscriptionId
+          schema:
+            type: string
+          required: true
+          description: The ID of the subscription to pay for
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  description: The ID of the user making the payment
+                paymentMethod:
+                  type: string
+                  description: The payment method used
+                transactionId:
+                  type: string
+                  description: The transaction ID from the payment provider
+                amount:
+                  type: number
+                  description: The amount paid
+              required:
+                - userId
+                - paymentMethod
+                - transactionId
+                - amount
+      responses:
+      '201':
+        description: Payment processed successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: success
+                message:
+                  type: string
+                  example: Payment processed successfully
+                data:
+                  type: object
+                  properties:
+                    payment:
+                      $ref: '#/components/schemas/Payment'
+                    subscriber:
+                      $ref: '#/components/schemas/Subscriber'
+      '400':
+        description: Bad Request
+      '500':
+        description: Internal Server Error
+
   /partner/createPartner:
     post:
       summary: Create a new partner
