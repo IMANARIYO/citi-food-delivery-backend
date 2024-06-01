@@ -459,6 +459,12 @@ const createOrUpdateObject = async (req, Model, isUpdate = false) => {
     }
 
     if(Model ===Subscription){
+      // Check for existing subscription of the same type
+      const existingSubscription = await Subscription.findOne({ type });
+
+      if (existingSubscription) {
+        throw new AppError(`A ${type} subscription already exists.`, 400);
+      }
 if(req.body.type==='monthly'){
   newObject.monthlyAmount=req.body.amount;
   newObject.dailyprice=req.body.amount/30;
@@ -568,7 +574,7 @@ const handleModelOperation = (Model, operation) => {
           }
 
           // Update status to 'read' if the model is Notification
-  if (Model === Notification) {
+  if ( req.params.id && Model === Notification) {
     readResult.status = 'read';
     await readResult.save();
   }
