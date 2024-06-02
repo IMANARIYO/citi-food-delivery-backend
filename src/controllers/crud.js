@@ -378,7 +378,9 @@ const createOrUpdateObject = async (req, Model, isUpdate = false) => {
   }
 
   if (req.files && req.files.image) {
+    console.log();
     newObject.image = (await cloudinary.uploader.upload(req.files.image[0].path)).secure_url;
+    console.log("image request",newObject.image);
   }
 
   // Check and deduplicate categories
