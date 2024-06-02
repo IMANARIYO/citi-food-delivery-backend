@@ -379,12 +379,14 @@ const createOrUpdateObject = async (req, Model, isUpdate = false) => {
 
   if (req.files && req.files.image) {
 
+    
     console.log("we are handling image");
+    const file = req.files.image[0];
     // Check if the file is an image
     if (!file.mimetype.startsWith('image/')) {
       throw new AppError('Uploaded file is not an image', 400);
     }
-
+    
     // Check if the file has content
     if (!file.size) {
       throw new AppError('Uploaded image is empty', 400);
