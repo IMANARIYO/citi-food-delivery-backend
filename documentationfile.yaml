@@ -840,12 +840,6 @@ paths:
             type: string
           required: true
           description: ID of the food item to add to the cart
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AddToCartRequest'
       responses:
         '200':
           description: Item added to the cart successfully

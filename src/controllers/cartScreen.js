@@ -15,7 +15,7 @@ export const addToCartHandler = async (req, res, next) => {
   try {
     let userId=req.userId;
     let foodItemId=req.params.foodItemId;
-    const { quantity } = req.body;
+    const { quantity } = 1;
     let cart = await Cart.findOne({ userId });
 
     if (!cart) {
