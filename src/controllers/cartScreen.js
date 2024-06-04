@@ -51,8 +51,16 @@ export const addToCartHandler = async (req, res, next) => {
 export const getCartHandler = async (req, res, next) => {
   try {
     const userId = req.userId;
-    const cart = await Cart.findOne({ userId }).populate('foodItems.foodItem');
+    // const cart = await Cart.findOne({ userId }).populate('foodItems.foodItem').populate('foodItem.category');
 
+    const cart = await Cart.findOne({ userId })
+    .populate({
+      path: 'foodItems.foodItem',
+      populate: {
+        path: 'category',
+        model: 'Category', // Replace with your actual Category model name
+      },
+    });
     if (!cart) {
       return res.status(404).json({
         status: 'fail',
