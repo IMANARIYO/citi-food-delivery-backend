@@ -390,10 +390,11 @@ const createOrUpdateObject = async (req, Model, isUpdate = false) => {
     // Check if the file has content
     if (!file.size) {
       throw new AppError('Uploaded image is empty', 400);
+      
     }
     newObject.image = (await cloudinary.uploader.upload(req.files.image[0].path)).secure_url;
     
-    console.log("image request",newObject.image);
+    // console.log("image request",newObject.image,https://res.cloudinary.com/dorjr1njc/image/upload);
   }
 
   // Check and deduplicate categories

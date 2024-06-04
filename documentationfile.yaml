@@ -810,6 +810,22 @@ paths:
           description: "Successfully deleted the weekly menu item"
         404:
           description: "Weekly menu item not found"
+  
+  
+  /citi_api/v1/cart/getall:
+    get:
+      summary: Get all items in the cart
+      tags:
+        - Cart
+      security:
+       - bearerAuth: []
+      responses:
+        '200':
+          description: Cart retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
   /citi_api/v1/cart/add-to-cart/{foodItemId}:
     post:
       summary: Add an item to the cart
@@ -1060,8 +1076,7 @@ paths:
                     type: string
                     example: Order deleted successfully
                   data:
-                    type: null
-  
+                    type: null 
   /citi_api/v1/order/deliver/order-id/{id}:
     patch:
       summary: Update the delivery status of an order

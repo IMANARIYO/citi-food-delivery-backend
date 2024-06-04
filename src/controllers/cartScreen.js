@@ -46,6 +46,28 @@ export const addToCartHandler = async (req, res, next) => {
   }
 };
 
+// Handler function to get all items in the cart for a given user
+export const getCartHandler = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    const cart = await Cart.findOne({ userId }).populate('foodItems.foodItem');
+
+    if (!cart) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Cart not found for user',
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Cart retrieved successfully',
+      data: cart,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 // Handler function to update item quantity in the cart
 export const updateCartHandler = async (req, res, next) => {
   try {
