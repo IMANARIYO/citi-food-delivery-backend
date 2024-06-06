@@ -118,14 +118,22 @@ const createOrUpdateObject = async (req, Model, isUpdate = false) => {
     }
 
     if (Model === Payment) {
+      let userId = req.userId;
+      newObject.userId = userId;
       const orderId = req.params.orderId;
       const amount = req.body.amount;
-const phonenumber=req.body.phonenumber;
+      const phonenumber = req.body.phonenumber ? req.body.phonenumber : req.user.phoneNumber;
+      if (!phonenumber) {
+        return res.status(400).json({ error: 'Phone number is required' });
+      }
+newObject.phoneNumber = phonenumber;
       const order = await Order.findById(orderId);
       if (!order) {
         throw new AppError('Order not found', 404);
       }
-
+if(order.status==='paid'){
+  throw new AppError('Order is already paid', 400);
+}
       if (amount < order.totalPrice) {
         throw new AppError('Payment amount is less than the order total price', 400);
       }

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const categorySchema = new mongoose.Schema({
   name: { type: String, required: true },
-  image: { type: String,  },
+  images: [{ type: String,  }],
 }, { timestamps: true }).set('strictPopulate', false);
 // Static method for search functionality
 categorySchema.statics.search = async function(searchParams) {
