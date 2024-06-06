@@ -264,11 +264,23 @@ const handleModelOperation = (Model, operation) => {
             .populate('reviews')
             .populate('subscriptionId')
             .populate({
+              path: 'items.foodItem',
+              populate: {
+                path: 'category'
+              }
+            })
+.populate({path: 'items',
+  populate: {
+    path: 'foodItem',
+  }
+
+})
+            .populate({
               path: 'foodItem',
               populate: {
                 path: 'category',
               }
-            });;
+            });
 
           const readResult = await query.exec();
           if (!readResult) {
