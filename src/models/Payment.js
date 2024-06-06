@@ -4,6 +4,7 @@ const paymentSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order' },
    subscriptionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Subscription' },
+   phonenumber: { type: Number, required: false },
   amount: { type: Number, required: true },
   currency: { type: String, default: 'frw' },
   paymentMethod: { type: String, required: true },

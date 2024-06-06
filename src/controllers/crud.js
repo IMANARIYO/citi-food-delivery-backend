@@ -120,7 +120,7 @@ const createOrUpdateObject = async (req, Model, isUpdate = false) => {
     if (Model === Payment) {
       const orderId = req.params.orderId;
       const amount = req.body.amount;
-
+const phonenumber=req.body.phonenumber;
       const order = await Order.findById(orderId);
       if (!order) {
         throw new AppError('Order not found', 404);
@@ -262,7 +262,13 @@ const handleModelOperation = (Model, operation) => {
             .populate('userId')
             .populate('paymentId')
             .populate('reviews')
-            .populate('subscriptionId');
+            .populate('subscriptionId')
+            .populate({
+              path: 'foodItem',
+              populate: {
+                path: 'category',
+              }
+            });;
 
           const readResult = await query.exec();
           if (!readResult) {
