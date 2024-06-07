@@ -236,12 +236,38 @@ const handleModelOperation = (Model, operation) => {
       let result;
       switch (operation) {
         case 'create':
-          result = await createOrUpdateObject(req, Model);
-          res.status(201).json({
-            status: 'success',
-            message: `${Model.modelName} created successfully`,
-            data: result
-          });
+          if (Model === Favorite) {
+            const userId = req.userId;
+            const foodItemId = req.body.foodItem;
+
+            // Check if the favorite already exists
+            const existingFavorite = await Favorite.findOne({ userId, foodItem: foodItemId });
+            if (existingFavorite) {
+              // Remove the favorite if it exists
+              await Favorite.findByIdAndDelete(existingFavorite._id);
+              res.status(200).json({
+                status: 'success',
+                message: 'Favorite removed successfully',
+                data: existingFavorite
+              });
+            } else {
+              // Add the favorite if it doesn't exist
+              const newFavorite = new Favorite({ userId, foodItem: foodItemId });
+              result = await newFavorite.save();
+              res.status(201).json({
+                status: 'success',
+                message: 'Favorite added successfully',
+                data: result
+              });
+            }
+          } else {
+            result = await createOrUpdateObject(req, Model);
+            res.status(201).json({
+              status: 'success',
+              message: `${Model.modelName} created successfully`,
+              data: result
+            });
+          }
           break; // Added break statement
         case 'read':
           let query;
