@@ -120,7 +120,23 @@ components:
           description: Currency of the payment
         paymentMethod:
           type: string
-          description: Payment method used (e.g., credit card, PayPal)      
+          description: Payment method used (e.g., credit card, PayPal)
+        groupPayments:
+                type: array
+                description: An array of group payment details
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      description: The name of the individual
+                    phoneNumber:
+                      type: string
+                      description: The phone number of the individual
+                    amount:
+                      type: number
+                      description: The amount paid by the individual  
+               
     Review:
       type: object
       properties:
@@ -1830,6 +1846,7 @@ paths:
           description: Payment successful
         '500':
           description: Internal Server Error
+  
   /citi_api/v1/payment/get/{id}:
     get:
       summary: Get a payment by ID
@@ -2228,7 +2245,7 @@ paths:
         '500':
           description: Internal Server Error
   
-  /citi_api/v1/subscribe/pay/{subscribId}:
+  /citi_api/v1/subscribe/pay1/{subscribId}:
     post:
       summary: Process payment for a subscription
       tags: [subscribers]
@@ -2260,11 +2277,26 @@ paths:
                 amount:
                   type: number
                   description: The amount paid
-              required:
-                - userId
-                - paymentMethod
-                - transactionId
-                - amount
+                groupPayments:
+                  type: array
+                  description: An array of group payment details
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: The name of the individual
+                      phoneNumber:
+                        type: string
+                        description: The phone number of the individual
+                      amount:
+                        type: number
+                        description: The amount paid by the individual  
+                  required:
+                  - userId
+                  - paymentMethod
+                  - transactionId
+                  - amount
       responses:
       '201':
         description: Payment processed successfully
@@ -2290,7 +2322,84 @@ paths:
         description: Bad Request
       '500':
         description: Internal Server Error
-
+  
+  /citi_api/v1/subscribe/pay/{subscribId}:
+    post:
+      summary: Process payment for a subscription
+      tags: [subscribers]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: subscribId
+          schema:
+            type: string
+          required: true
+          description: The ID of the subscription to pay for
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  description: The ID of the user making the payment
+                paymentMethod:
+                  type: string
+                  description: The payment method used
+                transactionId:
+                  type: string
+                  description: The transaction ID from the payment provider
+                amount:
+                  type: number
+                  description: The amount paid
+                groupPayments:
+                  type: array
+                  description: An array of group payment details
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: The name of the individual
+                      phoneNumber:
+                        type: string
+                        description: The phone number of the individual
+                      amount:
+                        type: number
+                        description: The amount paid by the individual
+                # required:
+                #   - userId
+                #   - paymentMethod
+                #   - transactionId
+                #   - amount
+      responses:
+        '201':
+          description: Payment processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Payment processed successfully
+                  data:
+                    type: object
+                    properties:
+                      payment:
+                        $ref: '#/components/schemas/Payment'
+                      subscriber:
+                        $ref: '#/components/schemas/Subscriber'
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error
   /partner/createPartner:
     post:
       summary: Create a new partner

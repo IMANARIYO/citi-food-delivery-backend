@@ -18,6 +18,11 @@ cloudinary.config({
   api_key: process.env.API_KEY,
   api_secret: process.env.API_SECRET,
 });
+// Helper function to delete existing weekly menu for a specific day
+const deleteExistingWeeklyMenu = async (day) => {
+  console.log(`Deleting existing weekly menu for ${day}`);
+  await WeeklyMenu.findOneAndDelete({ day });
+};
 
 // Helper function to check and add categories
 const checkAndAddCategories = async (categories) => {
@@ -47,6 +52,7 @@ const checkAndAddFoodItems = async (foodItems) => {
 
 // Combined create and update function
 const createOrUpdateObject = async (req, Model, isUpdate = false) => {
+
   let newObject = { ...req.body };
 
   // Handle image uploads
@@ -85,22 +91,7 @@ const createOrUpdateObject = async (req, Model, isUpdate = false) => {
     newObject.category = newObject.category.split(',');
     newObject.category = await checkAndAddCategories(newObject.category);
 
-    if (Model === WeeklyMenu) {
-      const { day, foodItems } = newObject;
-      const existingMenu = await WeeklyMenu.findOne({ day });
-
-      if (existingMenu) {
-        for (const item of foodItems) {
-          if (!existingMenu.foodItems.includes(item)) {
-            existingMenu.foodItems.push(item);
-          }
-        }
-        await existingMenu.save();
-        return existingMenu;
-      } else {
-        return await WeeklyMenu.create(newObject);
-      }
-    }
+   
   }
 
   if (isUpdate) {
@@ -131,10 +122,64 @@ newObject.phoneNumber = phonenumber;
       if (!order) {
         throw new AppError('Order not found', 404);
       }
-if(order.status==='paid'){
-  throw new AppError('Order is already paid', 400);
-}
-      if (amount < order.totalPrice) {
+      if (Model === Payment) {
+        const orderId = req.params.orderId;
+        const order = await Order.findById(orderId);
+        if (!order) {
+          throw new AppError('Order not found', 404);
+        }
+  
+        if (order.status === 'paid') {
+          throw new AppError('Order is already paid', 400);
+        }
+  
+        const isGroupPayment = Array.isArray(newObject.groupPayments) && newObject.groupPayments.length > 0;
+        if (isGroupPayment) {
+          // Calculate the total group payment amount
+          const totalGroupAmount = newObject.groupPayments.reduce((total, payment) => total + payment.amount, 0);
+  
+          if (totalGroupAmount !== order.totalPrice) {
+            throw new AppError('Total group payment amount does not match the order total price', 400);
+          }
+  
+          newObject.amount = totalGroupAmount;
+        } else {
+          const amount = req.body.amount;
+          const phoneNumber = req.body.phoneNumber || req.user.phoneNumber;
+          if (!phoneNumber) {
+            throw new AppError('Phone number is required', 400);
+          }
+  
+          if (amount < order.totalPrice || amount > order.totalPrice) {
+            throw new AppError('Payment amount does not match the order total price', 400);
+          }
+  
+          newObject.phoneNumber = phoneNumber;
+          newObject.amount = amount;
+        }
+  
+        newObject.orderId = orderId;
+  
+        const payment = new Payment(newObject);
+        await payment.save();
+  
+        order.paymentId = payment._id;
+        order.status = 'paid';
+        await order.save();
+  
+        payment.status = 'completed';
+        await payment.save();
+  
+        const notification = new Notification({
+          message: 'Order paid successfully. Delivery in process.',
+          orderId: order._id,
+          userId: userId,
+          status: 'unread',
+        });
+        await notification.save();
+  
+        return payment;
+      } if (amount < order.totalPrice) {
         throw new AppError('Payment amount is less than the order total price', 400);
       }
       if (amount > order.totalPrice) {
@@ -166,6 +211,7 @@ if(order.status==='paid'){
     }
 
     if(Model ===Subscription){
+      const type = req.body.type;
       // Check for existing subscription of the same type
       const existingSubscription = await Subscription.findOne({ type });
 
@@ -176,9 +222,10 @@ if(req.body.type==='monthly'){
   newObject.monthlyAmount=req.body.amount;
   newObject.dailyprice=req.body.amount/30;
 }
-else if( req.body==='weekly'){
+else if( req.body.type==='weekly'){
   newObject.weeklyAmount=req.body.amount;
   newObject.dailyprice=req.body.amount/7;
+  newObject.type=req.body.type;
 }
     }
     if (Model === Subscriber) {
@@ -223,8 +270,18 @@ else if( req.body==='weekly'){
       });
       await notification.save();
     }
+    if (Model === WeeklyMenu) {
+      const { day, foodItems } = newObject;
+      const existingMenu = await WeeklyMenu.findOne({ day });
+  
+      if (existingMenu) {
+        // Delete the existing menu for the specific day
+        await deleteExistingWeeklyMenu(day);
+      }
 
-
+    
+      return await WeeklyMenu.create(newObject);
+    }
     return await Model.create(newObject);
   }
 };
@@ -286,7 +343,7 @@ const handleModelOperation = (Model, operation) => {
           }
 
           if (req.params.id) {
-            query = query.findById(req.params.id);
+            query = Model  .findById(req.params.id);
           }
 
           query.populate('foodItems')
@@ -315,6 +372,29 @@ const handleModelOperation = (Model, operation) => {
                 path: 'category',
               }
             });
+            // Comprehensive population for Notification model
+          if (Model === Notification) {
+            query
+              .populate('userId')
+              .populate({
+                path: 'orderId',
+                populate: {
+                  path: 'userId',
+                  model: 'User'
+                }
+              })
+              .populate({
+                path: 'orderId',
+                populate: {
+                  path: 'items.foodItem',
+                  populate: {
+                    path: 'category',
+                    model: 'Category'
+                  }
+                }
+              });
+          }
+
 
           const readResult = await query.exec();
           if (!readResult) {
