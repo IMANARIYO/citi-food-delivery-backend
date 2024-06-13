@@ -271,11 +271,11 @@ else if( req.body.type==='weekly'){
       await notification.save();
     }
     if (Model === WeeklyMenu) {
+      let existingMenu = await WeeklyMenu.findOne();
       const days = Object.keys(newObject);
       for (const day of days) {
         if (typeof newObject[day] === 'object') {
           // Find existing weekly menu
-          let existingMenu = await WeeklyMenu.findOne();
           
           if (existingMenu) {
             // Delete existing data for the specified day
@@ -285,7 +285,7 @@ else if( req.body.type==='weekly'){
           } else {
             // If no existing menu, create a new one
             existingMenu = new WeeklyMenu();
-            console.log("here  ---------------------------------",existingMenu);
+          
           }
           // Prepare new data for the specified day
           for (const mealTime of ['morning', 'lunch', 'dinner']) {

@@ -5,6 +5,7 @@ import { passHashing } from "../utils/passwordfunctions.js";
 import { isOTPValid } from "../utils/passwordfunctions.js";
 
 export const generateAndSendOTP = async (req, res) => {
+  console.log('the user is-------------------------------------------------------------', "here")
   const otp = generateOTP().code
   const expiresAt = generateOTP().expiresAt
   const userEmail = req.body.email
@@ -14,6 +15,7 @@ export const generateAndSendOTP = async (req, res) => {
       message: `No user with email ${userEmail} found. Please use a correct registered email if you have ever signed up.`
     })
   }
+ 
   user.otp = otp
   user.otpExpiresAt = expiresAt
   await user.save()
