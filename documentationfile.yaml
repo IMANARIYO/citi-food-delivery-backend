@@ -19,6 +19,59 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    Meal:
+      type: object
+      properties:
+        foodItems:
+          type: array
+          items:
+            type: string  # Assuming foodItem IDs are represented as strings
+          example: ["6662b787fd3509a60b3e2df0", "6662b810fd3509a60b3e2e30"]
+        totalCost:
+          type: number
+          default: 0
+      required:
+        - foodItems
+
+    Day:
+      type: object
+      properties:
+        morning:
+          $ref: '#/components/schemas/Meal'
+        lunch:
+          $ref: '#/components/schemas/Meal'
+        dinner:
+          $ref: '#/components/schemas/Meal'
+      required:
+        - morning
+        - lunch
+        - dinner
+
+    WeeklyMenu:
+      type: object
+      properties:
+        Sunday:
+          $ref: '#/components/schemas/Day'
+        Monday:
+          $ref: '#/components/schemas/Day'
+        Tuesday:
+          $ref: '#/components/schemas/Day'
+        Wednesday:
+          $ref: '#/components/schemas/Day'
+        Thursday:
+          $ref: '#/components/schemas/Day'
+        Friday:
+          $ref: '#/components/schemas/Day'
+        Saturday:
+          $ref: '#/components/schemas/Day'
+      required:
+        - Sunday
+        - Monday
+        - Tuesday
+        - Wednesday
+        - Thursday
+        - Friday
+        - Saturday
     Subscriber:
       type: object
       properties:
@@ -35,7 +88,9 @@ components:
           enum: ['weekly', 'monthly']
         amount:
           type: number
-       
+        daySchema:
+          type: string
+          enum: ['morning', 'lunch', 'dinner']
     AddToCartRequest:
       type: object
       properties:
@@ -701,31 +756,18 @@ paths:
  
   /citi_api/v1/weeklymenu/create:
     post:
-      tags:
-        - "Weekly Menu"
-      summary: "Create a new weekly menu item"
+      summary: Create a new weekly menu
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: "object"
-              properties:
-                day:
-                  type: "string"
-                  description: "Day of the week (e.g., Sunday, Monday, Tuesday)"
-                  example: "Monday"
-                foodItems:
-                  type: "array"
-                  items:
-                    type: "string"
-                  description: "List of food item IDs"
-                  example: ["123", "456", "789"]
+              $ref: '#/components/schemas/WeeklyMenu'
       responses:
-        201:
-          description: "Successfully created a new weekly menu item"
-        400:
-          description: "Bad request. Please check the request parameters."
+        '200':
+          description: Successfully created
+        '400':
+          description: Bad request
   /citi_api/v1/weeklymenu/get:
     get:
       tags:
@@ -2029,6 +2071,7 @@ paths:
           description: Review not found
         '500':
           description: Internal Server Error
+  
   /citi_api/v1/subscription/create-subscription:
     post:
       summary: Create a new subscription
@@ -2153,6 +2196,7 @@ paths:
         '500':
           description: Internal Server Error
 
+  
   /citi_api/v1/subscribe/subscribefor/{subscriptionId}:
     post:
       summary: Subscribe for a subscription

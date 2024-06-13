@@ -19,6 +19,24 @@ cloudinary.config({
   api_key: process.env.API_KEY,
   api_secret: process.env.API_SECRET,
 });
+
+// Function to calculate total cost for a selected daySchema in WeeklyMenu
+const calculateTotalCost = async (daySchema) => {
+  let totalCost = 0;
+  const weeklyMenu = await WeeklyMenu.findOne();
+  
+  console.log("toatl cost for this  is subscriptions------------------------------",  weeklyMenu[daySchema]);
+  if (weeklyMenu && weeklyMenu[daySchema]) {
+    const meals = ['morning', 'lunch', 'dinner'];
+    meals.forEach(meal => {
+      if (weeklyMenu[daySchema][meal]) {
+        totalCost += weeklyMenu[daySchema][meal].totalCost || 0;
+        }
+    });
+  }
+  
+  return totalCost;
+};
 // Helper function to delete existing weekly menu for a specific day
 const deleteExistingWeeklyMenu = async (day) => {
   console.log(`Deleting existing weekly menu for ${day}`);
@@ -211,13 +229,14 @@ newObject.phoneNumber = phonenumber;
       return payment;
     }
     if(Model ===Subscription){
-      const type = req.body.type;
+      const { type, amount, daySchema } = req.body;
+    
       // Check for existing subscription of the same type
-      const existingSubscription = await Subscription.findOne({ type });
+      // const existingSubscription = await Subscription.findOne({ type });
 
-      if (existingSubscription) {
-        throw new AppError(`A ${type} subscription already exists.`, 400);
-      }
+      // if (existingSubscription) {
+      //   throw new AppError(`A ${type} subscription already exists.`, 400);
+      // }
 if(req.body.type==='monthly'){
   newObject.monthlyAmount=req.body.amount;
   newObject.dailyprice=req.body.amount/30;
@@ -227,7 +246,22 @@ else if( req.body.type==='weekly'){
   newObject.dailyprice=req.body.amount/7;
   newObject.type=req.body.type;
 }
-    }
+else if( req.body.type==='bi-weekly'){
+  newObject.biWeeklyAmount=req.body.amount;
+  newObject.dailyprice=req.body.amount/15;
+  newObject.type=req.body.type;
+}
+   
+ // Validate subscription amount against total cost for selected daySchema
+ if (daySchema) {
+  console.log(daySchema);
+  const totalCost = await calculateTotalCost(daySchema);
+  if (amount < totalCost) {
+    throw new AppError(`Subscription amount (${amount}) cannot be less than total cost (${totalCost}) for ${daySchema}`, 400);
+  }
+}
+
+}
     if (Model === Subscriber) {
       const subscriptionId = req.params.subscriptionId;
       newObject.subscriptionId=subscriptionId;
@@ -256,9 +290,16 @@ else if( req.body.type==='weekly'){
         newObject.endDate = new Date(newObject.startDate);
         newObject.endDate.setDate(newObject.endDate.getDate() + 7);
       }
-      console.log(typeof(newObject.amount));
-      console.log(req.body.numberOfPeople);
-      console.log("numberof peapplle",newObject.numberOfPeople,"hello");
+      else if (subscription.type === 'bi-weekly',subscription.amount) {
+        newObject.weeklyAmount = subscription.amount;
+        
+        newObject.dailyprice = subscription.amount / 15;
+        newObject.endDate = new Date(newObject.startDate);
+        newObject.endDate.setDate(newObject.endDate.getDate() +  15);
+      }
+
+   
+      newObject.numberOfPeople = req.body.numberOfPeople;
       newObject.totalAmount = newObject.amount * newObject.numberOfPeople;
 
 
@@ -271,6 +312,7 @@ else if( req.body.type==='weekly'){
       await notification.save();
     }
     if (Model === WeeklyMenu) {
+      await WeeklyMenu.deleteMany({});
       let existingMenu = await WeeklyMenu.findOne();
       const days = Object.keys(newObject);
       for (const day of days) {
