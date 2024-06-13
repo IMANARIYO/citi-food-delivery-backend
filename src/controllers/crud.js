@@ -1,3 +1,4 @@
+import Cart from "../models/Cart.js";
 import Category from "../models/Category.js";
 import Favorite from "../models/Favorite.js";
 import Notification from "../models/Notification.js";
@@ -209,7 +210,6 @@ newObject.phoneNumber = phonenumber;
 
       return payment;
     }
-
     if(Model ===Subscription){
       const type = req.body.type;
       // Check for existing subscription of the same type
@@ -271,17 +271,54 @@ else if( req.body.type==='weekly'){
       await notification.save();
     }
     if (Model === WeeklyMenu) {
-      const { day, foodItems } = newObject;
-      const existingMenu = await WeeklyMenu.findOne({ day });
-  
-      if (existingMenu) {
-        // Delete the existing menu for the specific day
-        await deleteExistingWeeklyMenu(day);
-      }
-
-    
-      return await WeeklyMenu.create(newObject);
+      const days = Object.keys(newObject);
+      for (const day of days) {
+        if (typeof newObject[day] === 'object') {
+          // Find existing weekly menu
+          let existingMenu = await WeeklyMenu.findOne();
+          
+          if (existingMenu) {
+            // Delete existing data for the specified day
+            if (existingMenu[day]) {
+              existingMenu[day] = undefined;
+            }
+          } else {
+            // If no existing menu, create a new one
+            existingMenu = new WeeklyMenu();
+            console.log("here  ---------------------------------",existingMenu);
+          }
+          // Prepare new data for the specified day
+          for (const mealTime of ['morning', 'lunch', 'dinner']) {
+            if (newObject[day][mealTime] && newObject[day][mealTime].foodItems) {
+              newObject[day][mealTime].foodItems = await checkAndAddFoodItems(newObject[day][mealTime].foodItems);
+              }
+              }
+              
+              // Add new data for the specified day to the existingMenu
+              existingMenu[day] = newObject[day];
+              }
+              }
+              
+              await existingMenu.save();
+              console.log("here  ---------------------------------");
     }
+    
+    // Helper function to check and add food items
+    async function checkAndAddFoodItems(foodItems) {
+      const FoodItem = mongoose.model('foodItem');
+      const foodItemPromises = foodItems.map(async (itemId) => {
+        const foodItem = await FoodItem.findById(itemId);
+        if (!foodItem) {
+          throw new Error(`FoodItem with ID ${itemId} not found`);
+        }
+        return itemId;
+      });
+    
+      return Promise.all(foodItemPromises);
+    }
+    
+   
+   
     return await Model.create(newObject);
   }
 };
@@ -371,6 +408,9 @@ const handleModelOperation = (Model, operation) => {
               populate: {
                 path: 'category',
               }
+            }).populate({
+              path: 'Sunday.morning.foodItems Sunday.lunch.foodItems Sunday.dinner.foodItems Monday.morning.foodItems Monday.lunch.foodItems Monday.dinner.foodItems Tuesday.morning.foodItems Tuesday.lunch.foodItems Tuesday.dinner.foodItems Wednesday.morning.foodItems Wednesday.lunch.foodItems Wednesday.dinner.foodItems Thursday.morning.foodItems Thursday.lunch.foodItems Thursday.dinner.foodItems Friday.morning.foodItems Friday.lunch.foodItems Friday.dinner.foodItems Saturday.morning.foodItems Saturday.lunch.foodItems Saturday.dinner.foodItems',
+              model: 'foodItem'
             });
             // Comprehensive population for Notification model
           if (Model === Notification) {

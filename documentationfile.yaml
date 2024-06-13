@@ -469,6 +469,8 @@ paths:
     post:
       summary: Change Password (Authenticated Route)
       tags: [authentication]
+      security:
+        - bearerAuth: []
       operationId: changepassword
       parameters:
         - name: Authorization
@@ -696,13 +698,12 @@ paths:
           description: User not found
         '500':
           description: Internal Server Error
+ 
   /citi_api/v1/weeklymenu/create:
     post:
       tags:
         - "Weekly Menu"
       summary: "Create a new weekly menu item"
-      consumes:
-        - "application/json"
       requestBody:
         required: true
         content:
@@ -725,7 +726,6 @@ paths:
           description: "Successfully created a new weekly menu item"
         400:
           description: "Bad request. Please check the request parameters."
-
   /citi_api/v1/weeklymenu/get:
     get:
       tags:
@@ -755,13 +755,12 @@ paths:
       tags:
         - "Weekly Menu"
       summary: "Update a weekly menu item by ID"
-      consumes:
-        - "application/json"
       parameters:
         - in: "path"
           name: "id"
           required: true
-          type: "string"
+          schema:
+            type: "string"
           description: "ID of the weekly menu item to update"
       requestBody:
         required: true
@@ -787,7 +786,6 @@ paths:
           description: "Bad request. Please check the request parameters."
         404:
           description: "Weekly menu item not found"
-
   /citi_api/v1/weeklymenu/delete/{id}:
     delete:
       tags:

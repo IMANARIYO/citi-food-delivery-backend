@@ -1,3 +1,4 @@
+import Cart from "../models/Cart.js";
 import Subscriber from "../models/subscribers.js";
 import Subscription from "../models/Subscription.js";
 import express from "express";
