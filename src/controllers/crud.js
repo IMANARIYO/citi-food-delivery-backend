@@ -25,7 +25,7 @@ const calculateTotalCost = async (daySchema) => {
   let totalCost = 0;
   const weeklyMenu = await WeeklyMenu.findOne();
   
-  console.log("toatl cost for this  is subscriptions------------------------------",  weeklyMenu[daySchema]);
+
   if (weeklyMenu && weeklyMenu[daySchema]) {
     const meals = ['morning', 'lunch', 'dinner'];
     meals.forEach(meal => {
@@ -56,6 +56,7 @@ const checkAndAddCategories = async (categories) => {
 
 // Helper function to check and add food items
 const checkAndAddFoodItems = async (foodItems) => {
+
   const validFoodItems = [];
   for (const foodItemId of foodItems) {
     const foodItemExists = await foodItem.findById(foodItemId);
@@ -86,8 +87,7 @@ const createOrUpdateObject = async (req, Model, isUpdate = false) => {
 
   if (req.files && req.files.image) {
 
-    
-    console.log("we are handling image");
+
     const file = req.files.image[0];
     // Check if the file is an image
     if (!file.mimetype.startsWith('image/')) {
@@ -124,8 +124,9 @@ const createOrUpdateObject = async (req, Model, isUpdate = false) => {
     if (schemaPaths.userId) {
       newObject.userId = userId;
     }
-
+  
     if (Model === Payment) {
+console.log("HERE WE","-------------------------------------------------------------------------");
       let userId = req.userId;
       newObject.userId = userId;
       const orderId = req.params.orderId;
@@ -140,6 +141,7 @@ newObject.phoneNumber = phonenumber;
         throw new AppError('Order not found', 404);
       }
       if (Model === Payment) {
+       
         const orderId = req.params.orderId;
         const order = await Order.findById(orderId);
         if (!order) {

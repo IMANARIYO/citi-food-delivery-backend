@@ -1,4 +1,6 @@
 import Cart from "../models/Cart.js";
+import Notification from "../models/Notification.js";
+import Payment from "../models/Payment.js";
 import Subscriber from "../models/subscribers.js";
 import Subscription from "../models/Subscription.js";
 import express from "express";
@@ -73,7 +75,8 @@ subscribersRouter.post('/pay/:subscribId', async (req, res) => {
       message: 'Payment processed successfully',
       data: {
         payment: newPayment,
-        subscriber
+        subscriber,
+        notification
       }
     });
   } catch (error) {
