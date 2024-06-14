@@ -2287,7 +2287,7 @@ paths:
         '500':
           description: Internal Server Error
   
-  /citi_api/v1/subscribe/pay1/{subscribId}:
+  /citi_api/v1/subscribe/pay1/{subscriptionId}:
     post:
       summary: Process payment for a subscription
       tags: [subscribers]

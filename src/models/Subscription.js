@@ -8,7 +8,7 @@ const subscriptionSchema = new mongoose.Schema({
     type: Number,
     required: false
   },
-  daySchema:{type: String,enum:['morning','lunch','dinner'] ,required: false},
+  daySchema:{type: String,enum:['morning','lunch','dinner'] ,required: true},
   weeklyAmount:{
     type: Number,
     required: false

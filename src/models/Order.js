@@ -22,8 +22,6 @@ const orderSchema = new mongoose.Schema(
     totalPrice: { type: Number, required: true },
     status: { type: String, default: 'pending' },
     customerPhone: { type: String, required: false },
-    driverphone: { type: String, required: false },
-    customerPhone: { type: String, required: false },
     driverPhone: { type: String, required: false },
     driverName: { type: String, required: false }, // Add driverN
     paymentId:{type:mongoose.Schema.Types.ObjectId,ref:'Payment'},

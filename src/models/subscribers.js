@@ -4,7 +4,7 @@ const SubscriberSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
   numberOfPeople: { type: Number, required: false },
   email: { type: String, required: false },
-  type: { type: String, enum: ['weekly', 'monthly'], required: false },
+  type: { type: String, enum: ['weekly', 'monthly','bi-weekly'], required: false },
   amount: { type: Number, required: false },
   monthlyAmount: {
     type: Number,
@@ -14,6 +14,11 @@ const SubscriberSchema = new mongoose.Schema({
     type: Number,
     required: false
   },
+  biWeeklyAmount:{
+    type: Number,
+    required: false
+  },
+  daySchema:{type: String,enum:['morning','lunch','dinner'] ,required: true},
   dailyprice: {
     type: Number,
     required: false
@@ -25,7 +30,7 @@ const SubscriberSchema = new mongoose.Schema({
   startDate: { type: Date, default: Date.now, required: false },
   endDate: { type: Date, required: false },
   status: { type: String, default: "pending", required: false },
-  payment: { type: mongoose.Schema.Types.ObjectId, ref: 'Payment' },
+  payment: { type: mongoose.Schema.Types.ObjectId, ref: 'Payment',required: false},
   subscriptionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Subscription' },
   totalAmount: { type: Number, required: false },
   remianingbalance: { type: Number, required: false },

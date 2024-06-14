@@ -34,7 +34,6 @@ const calculateTotalCost = async (daySchema) => {
         }
     });
   }
-  
   return totalCost;
 };
 // Helper function to delete existing weekly menu for a specific day
@@ -101,8 +100,7 @@ const createOrUpdateObject = async (req, Model, isUpdate = false) => {
       
     }
     newObject.image = (await cloudinary.uploader.upload(req.files.image[0].path)).secure_url;
-    
-    // console.log("image request",newObject.image,https://res.cloudinary.com/dorjr1njc/image/upload);
+
   }
 
   // Check and deduplicate categories
@@ -232,11 +230,11 @@ newObject.phoneNumber = phonenumber;
       const { type, amount, daySchema } = req.body;
     
       // Check for existing subscription of the same type
-      // const existingSubscription = await Subscription.findOne({ type });
+      const existingSubscription = await Subscription.findOne({ type });
 
-      // if (existingSubscription) {
-      //   throw new AppError(`A ${type} subscription already exists.`, 400);
-      // }
+      if (existingSubscription) {
+        throw new AppError(`A ${type} subscription already exists.`, 400);
+      }
 if(req.body.type==='monthly'){
   newObject.monthlyAmount=req.body.amount;
   newObject.dailyprice=req.body.amount/30;
@@ -263,21 +261,22 @@ else if( req.body.type==='bi-weekly'){
 
 }
     if (Model === Subscriber) {
+      
       const subscriptionId = req.params.subscriptionId;
       newObject.subscriptionId=subscriptionId;
+
       const subscription = await Subscription.findById(subscriptionId);
       if (!subscription) {
-        throw new AppError('Subscription not found', 404);
-      }
+        throw new AppError(`Subscription not found fiound for ${subscriptionId}`, 404);
+        }
+        // const{newObject}={...subscription};
  // Set start date to the current date if not provided
  if (!newObject.startDate) {
   newObject.startDate = new Date();
 }
 
-      newObject.amount = subscription.amount;
      
-      newObject.type = subscription.type;
-      console.log("newObject.dailyprice",subscription.amount,subscription);
+   
       if (subscription.type === 'monthly') {
         newObject.monthlyAmount = subscription.amount;
         newObject.dailyprice = subscription.amount / 30;
@@ -291,17 +290,16 @@ else if( req.body.type==='bi-weekly'){
         newObject.endDate.setDate(newObject.endDate.getDate() + 7);
       }
       else if (subscription.type === 'bi-weekly',subscription.amount) {
-        newObject.weeklyAmount = subscription.amount;
-        
+        newObject.biWeeklyAmount = subscription.amount;
         newObject.dailyprice = subscription.amount / 15;
         newObject.endDate = new Date(newObject.startDate);
         newObject.endDate.setDate(newObject.endDate.getDate() +  15);
       }
 
-   
+   newObject.userId=req.userId;
       newObject.numberOfPeople = req.body.numberOfPeople;
-      newObject.totalAmount = newObject.amount * newObject.numberOfPeople;
-
+      newObject.totalAmount = subscription.amount * newObject.numberOfPeople;
+newObject.daySchema=subscription.daySchema;
 
 
       const notification = new Notification({
@@ -342,7 +340,7 @@ else if( req.body.type==='bi-weekly'){
               }
               
               await existingMenu.save();
-              console.log("here  ---------------------------------");
+   
     }
     
     // Helper function to check and add food items
@@ -359,8 +357,6 @@ else if( req.body.type==='bi-weekly'){
       return Promise.all(foodItemPromises);
     }
     
-   
-   
     return await Model.create(newObject);
   }
 };
@@ -411,7 +407,7 @@ const handleModelOperation = (Model, operation) => {
             if (req.user.role === 'admin') {
               query = Model.find();
             } else {
-              if (Model === Order || Model === Payment || Model === Notification || Model === Favorite || Model === Cart) {
+              if (Model === Order || Model === Payment || Model === Notification || Model === Favorite || Model === Cart || Model ===Subscriber) {
                 query = Model.find({ userId: req.userId });
               } else {
                 query = Model.find();
@@ -444,8 +440,7 @@ const handleModelOperation = (Model, operation) => {
     path: 'foodItem',
   }
 
-})
-            .populate({
+})          .populate({
               path: 'foodItem',
               populate: {
                 path: 'category',
