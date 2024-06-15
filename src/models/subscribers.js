@@ -18,7 +18,16 @@ const SubscriberSchema = new mongoose.Schema({
     type: Number,
     required: false
   },
-  daySchema:{type: String,enum:['morning','lunch','dinner'] ,required: true},
+  dayCategory:{type:String,required:true},
+  menu: [{
+    day: { type: String, required: true },
+    foodItems: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'foodItem', // Assuming 'foodItem' is the name of your FoodItem model
+      required: false
+    }]
+  }]
+  , 
   dailyprice: {
     type: Number,
     required: false

@@ -231,14 +231,15 @@ newObject.phoneNumber = phonenumber;
       return payment;
     }
     if(Model ===Subscription){
-      const { type, amount, daySchema } = req.body;
-    
-      // Check for existing subscription of the same type
-      const existingSubscription = await Subscription.findOne({ type });
-
+      const { type, amount, dayCategory } = req.body;
+      // Check for existing subscription with the same type and dayCategory
+      const existingSubscription = await Subscription.findOne({ type, dayCategory });
       if (existingSubscription) {
-        throw new AppError(`A ${type} subscription already exists.`, 400);
+        throw new AppError(`A ${type} subscription for the ${dayCategory} already exists.`, 400);
       }
+
+    
+     
 if(req.body.type==='monthly'){
   newObject.monthlyAmount=req.body.amount;
   newObject.dailyprice=req.body.amount/30;
@@ -265,6 +266,7 @@ else if( req.body.type==='bi-weekly'){
 
 }
     if (Model === Subscriber) {
+
       
       const subscriptionId = req.params.subscriptionId;
       newObject.subscriptionId=subscriptionId;
@@ -300,7 +302,8 @@ else if( req.body.type==='bi-weekly'){
    newObject.userId=req.userId;
       newObject.numberOfPeople = req.body.numberOfPeople;
       newObject.totalAmount = subscription.amount * newObject.numberOfPeople;
-newObject.daySchema=subscription.daySchema;
+newObject.dayCategory=subscription.dayCategory;
+newObject.menu=subscription.menu;
 
 
       const notification = new Notification({

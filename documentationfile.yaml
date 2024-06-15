@@ -92,9 +92,9 @@ components:
           enum: ['weekly', 'monthly']
         amount:
           type: number
-        daySchema:
+        dayCategory:
           type: string
-          enum: ['morning', 'lunch', 'dinner']
+          
     AddToCartRequest:
       type: object
       properties:
