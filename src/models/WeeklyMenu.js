@@ -26,7 +26,7 @@ const weeklyMenuSchema = new mongoose.Schema(
     Wednesday: daySchema,
     Thursday: daySchema,
     Friday: daySchema,
-    Saturday: daySchema,
+    Saturday: daySchema, 
   },
   { timestamps: true }
 ).set('strictPopulate', false);

@@ -19,59 +19,63 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
-    Meal:
-      type: object
-      properties:
-        foodItems:
-          type: array
-          items:
-            type: string  # Assuming foodItem IDs are represented as strings
-          example: ["6662b787fd3509a60b3e2df0", "6662b810fd3509a60b3e2e30"]
-        totalCost:
-          type: number
-          default: 0
-      required:
-        - foodItems
-
-    Day:
-      type: object
-      properties:
-        morning:
-          $ref: '#/components/schemas/Meal'
-        lunch:
-          $ref: '#/components/schemas/Meal'
-        dinner:
-          $ref: '#/components/schemas/Meal'
-      required:
-        - morning
-        - lunch
-        - dinner
-
     WeeklyMenu:
       type: object
       properties:
-        Sunday:
-          $ref: '#/components/schemas/Day'
-        Monday:
-          $ref: '#/components/schemas/Day'
-        Tuesday:
-          $ref: '#/components/schemas/Day'
-        Wednesday:
-          $ref: '#/components/schemas/Day'
-        Thursday:
-          $ref: '#/components/schemas/Day'
-        Friday:
-          $ref: '#/components/schemas/Day'
-        Saturday:
-          $ref: '#/components/schemas/Day'
+        day:
+          type: string
+          enum:
+            - Monday
+            - Tuesday
+            - Wednesday
+            - Thursday
+            - Friday
+            - Saturday
+            - Sunday
+          example: Monday
+        dayCategoryNames:
+          type: array
+          items:
+            type: string
+          example: ["Breakfast", "Lunch", "Dinner"]
+        dayCategories:
+          type: array
+          items:
+            type: string
+            format: uuid
+          example: ["60c72b2f4f1a2c001c8e4b19", "60c72b2f4f1a2c001c8e4b1a"]
       required:
-        - Sunday
-        - Monday
-        - Tuesday
-        - Wednesday
-        - Thursday
-        - Friday
-        - Saturday
+        - day
+    DayCategory:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Breakfast
+        foodItems:
+          type: array
+          items:
+            type: string
+            format: uuid
+          example: ["60c72b2f4f1a2c001c8e4b1b", "60c72b2f4f1a2c001c8e4b1c"]
+        day:
+          type: string
+          enum:
+            - Monday
+            - Tuesday
+            - Wednesday
+            - Thursday
+            - Friday
+            - Saturday
+            - Sunday
+          example: Monday
+      required:
+        - name
+        - day
+    
+    
+    
+    
     Subscriber:
       type: object
       properties:
@@ -754,9 +758,10 @@ paths:
         '500':
           description: Internal Server Error
  
-  /citi_api/v1/weeklymenu/create:
+  /citi_api/v1/weeklymenu/createDayForWeek:
     post:
       summary: Create a new weekly menu
+      tags: [Weekly Menu]
       requestBody:
         required: true
         content:
@@ -2442,6 +2447,182 @@ paths:
           description: Bad Request
         '500':
           description: Internal Server Error
+  /citi_api/v1/daycategory/create-day-categories:
+    post:
+      summary: Create a new day category
+      tags: [DayCategory]
+        
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the day category
+                foodItems:
+                  type: array
+                  items:
+                    type: string
+                    description: IDs of the food items associated with the category
+                day:
+                  type: string
+                  enum: [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
+                  description: The day of the week for this category
+              required:
+                - name
+                - day
+      responses:
+        '201':
+          description: Day category created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Day category created successfully
+                  dayCategory:
+                    $ref: '#/components/schemas/DayCategory'
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/daycategory/get-all-day-categories:
+    get:
+      summary: Get all day categories
+      tags:
+        - DayCategory
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DayCategory'
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/daycategory/getday-category/{id}:
+    get:
+      summary: Get day category by ID
+      tags:
+        - DayCategory
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: The ID of the day category to get
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DayCategory'
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/daycategory/update-day-category/{id}:
+    put:
+      summary: Update a day category by ID
+      tags:
+        - DayCategory
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: The ID of the day category to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the day category
+                foodItems:
+                  type: array
+                  items:
+                    type: string
+                    description: IDs of the food items associated with the category
+                day:
+                  type: string
+                  enum: [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
+                  description: The day of the week for this category
+              required:
+                - name
+                - day
+      responses:
+        '200':
+          description: Day category updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Day category updated successfully
+                  dayCategory:
+                    $ref: '#/components/schemas/DayCategory'
+        '400':
+          description: Bad Request
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  /citi_api/v1/daycategory/delete-day-category/{id}:
+    delete:
+      summary: Delete a day category by ID
+      tags:
+        - DayCategory
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: The ID of the day category to delete
+      responses:
+        '200':
+          description: Day category deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Day category deleted successfully
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+  
+  
+  
   /partner/createPartner:
     post:
       summary: Create a new partner

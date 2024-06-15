@@ -1,3 +1,4 @@
+import DayCategoryRouter from "./daycategory.js";
 import authRouter from "./authendspoints.js";
 import cartRouter from "./cartEndpoints copy.js";
 import categoryRouter from "./categoryEndpoints.js";
@@ -31,4 +32,5 @@ mainRouter.use('/notification', notificationRouter)
 mainRouter.use('/auth',authRouter)
 mainRouter.use('/weeklymenu', weeklyMenuRouter)
 mainRouter.use('/subscribe', subscribersRouter)
+mainRouter.use('/DayCategory', DayCategoryRouter)
 export default mainRouter

@@ -22,7 +22,7 @@ subscribersRouter.post('/pay/:subscribId', async (req, res) => {
     // Find the subscriber
     const subscriber = await Subscriber.findById(subscribId);
     if (!subscriber) {
-      return res.status(404).json({ message: "Subscription not found" });
+      return res.status(404).json({ message: "Subscriber not found" });
       }
       
       let totalPaymentAmount;

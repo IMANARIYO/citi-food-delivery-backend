@@ -12,6 +12,8 @@ import foodItem from "../models/foodItem.js";
 import mongoose from "mongoose";
 import { v2 as cloudinary } from "cloudinary";
 import { AppError, catchAsync } from "../middlewares/globaleerorshandling.js";
+import { weekDay } from "../models/Weekday.js";
+import { DayCategory } from "../models/dayCategory.js";
 
 dotenv.config();
 cloudinary.config({
@@ -276,9 +278,6 @@ else if( req.body.type==='bi-weekly'){
  if (!newObject.startDate) {
   newObject.startDate = new Date();
 }
-
-     
-   
       if (subscription.type === 'monthly') {
         newObject.monthlyAmount = subscription.amount;
         newObject.dailyprice = subscription.amount / 30;
@@ -431,6 +430,7 @@ const handleModelOperation = (Model, operation) => {
             .populate('paymentId')
             .populate('reviews')
             .populate('subscriptionId')
+            .populate('dayCategories')
             .populate({
               path: 'items.foodItem',
               populate: {
@@ -447,9 +447,6 @@ const handleModelOperation = (Model, operation) => {
               populate: {
                 path: 'category',
               }
-            }).populate({
-              path: 'Sunday.morning.foodItems Sunday.lunch.foodItems Sunday.dinner.foodItems Monday.morning.foodItems Monday.lunch.foodItems Monday.dinner.foodItems Tuesday.morning.foodItems Tuesday.lunch.foodItems Tuesday.dinner.foodItems Wednesday.morning.foodItems Wednesday.lunch.foodItems Wednesday.dinner.foodItems Thursday.morning.foodItems Thursday.lunch.foodItems Thursday.dinner.foodItems Friday.morning.foodItems Friday.lunch.foodItems Friday.dinner.foodItems Saturday.morning.foodItems Saturday.lunch.foodItems Saturday.dinner.foodItems',
-              model: 'foodItem'
             });
             // Comprehensive population for Notification model
           if (Model === Notification) {
