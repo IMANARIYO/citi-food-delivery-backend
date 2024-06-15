@@ -184,6 +184,19 @@ newObject.phoneNumber = phonenumber;
         const payment = new Payment(newObject);
         await payment.save();
   
+        const paymentSuccessful = true; // Replace with actual payment result
+
+  if (paymentSuccessful) {
+    // Find and delete the associated notification
+    const notificationId = order.orderId; // Assuming the order has a notificationId field
+    if (notificationId) {
+      await Notification.findByIdAndDelete(notificationId);
+    }
+  }
+
+
+
+
         order.paymentId = payment._id;
         order.status = 'paid';
         await order.save();
@@ -222,7 +235,7 @@ newObject.phoneNumber = phonenumber;
 
       const notification = new Notification({
         message: 'Order paid successfully. Delivery in process.',
-        orderId: order._id,
+     
         userId: userId,
         status: 'unread',
       });
@@ -306,12 +319,7 @@ newObject.dayCategory=subscription.dayCategory;
 newObject.menu=subscription.menu;
 
 
-      const notification = new Notification({
-        message: 'subscription made sbscription made succcessfully go and pay for stating.',
-        userId: userId,
-        status: 'unread',
-      });
-      await notification.save();
+     
     }
     if (Model === WeeklyMenu) {
       await WeeklyMenu.deleteMany({});
@@ -360,8 +368,18 @@ newObject.menu=subscription.menu;
     
       return Promise.all(foodItemPromises);
     }
-    
-    return await Model.create(newObject);
+    let newthing=await Model.create(newObject);
+    if(Model=== Subscriber){
+      const notification = new Notification({
+        message: 'subscription made sbscription made succcessfully go and pay for stating.',
+        userId: userId,
+        subscriber:newObject._id,
+        status: 'unread',
+      });
+      await notification.save();
+    }
+    return newthing;
+   
   }
 };
 

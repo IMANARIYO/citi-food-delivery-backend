@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const notificationSchema = new mongoose.Schema({
   message: { type: String, required: true },
+  subscriber: { type: mongoose.Schema.Types.ObjectId, ref: 'Subscriber', required: false }, // e.g., 'user', 'order'
   orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: false},
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
   status: { type: String, default: 'unread' }, // e.g., 'unread', 'read'

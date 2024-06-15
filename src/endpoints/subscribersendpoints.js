@@ -59,9 +59,19 @@ subscribersRouter.post('/pay/:subscribId', async (req, res) => {
 
     // Update subscriber's status and remaining balance
     subscriber.status = 'active';
-    subscriber.remainingBalance = 0;
+   
     await subscriber.save();
+    const paymentSuccessful = true; // Replace with actual payment result
 
+    if (paymentSuccessful) {
+      // Find and delete the associated notification
+      const notification = await Notification.findOne({ subscriber: subscribId });
+      if (notification) {
+        await Notification.findByIdAndDelete(notification._id);
+      }
+    }
+
+  
     // Create a notification
     const notification = new Notification({
       message: 'Subscription paid successfully. Delivery in process.',
