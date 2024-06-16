@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { weekDay } from "./Weekday.js";
 import { DayCategory } from "./dayCategory.js";
 
 const subscriptionSchema = new mongoose.Schema({
