@@ -58,7 +58,7 @@ const checkAndAddFoodItems = async (foodItems) => {
 };
 
 // Combined create and update function
-const createOrUpdateObject = async (req, Model, isUpdate = false) => {
+const createOrUpdateObject = async (res,req, Model, isUpdate = false) => {
 
   let newObject = { ...req.body };
 
@@ -114,7 +114,6 @@ const createOrUpdateObject = async (req, Model, isUpdate = false) => {
     }
   
     if (Model === Payment) {
-console.log("HERE WE","-------------------------------------------------------------------------");
       let userId = req.userId;
       newObject.userId = userId;
       const orderId = req.params.orderId;
@@ -150,7 +149,8 @@ newObject.phoneNumber = phonenumber;
           }
   
           newObject.amount = totalGroupAmount;
-        } else {
+        } 
+        else {
           const amount = req.body.amount;
           const phoneNumber = req.body.phoneNumber || req.user.phoneNumber;
           if (!phoneNumber) {
@@ -239,7 +239,7 @@ newObject.phoneNumber = phonenumber;
         throw new AppError(`A ${type} subscription for the ${dayCategory} already exists.`, 400);
       }
 
-    
+
      
 if(req.body.type==='monthly'){
   newObject.monthlyAmount=req.body.amount;
@@ -259,9 +259,60 @@ else if( req.body.type==='bi-weekly'){
  
 
 }
-if(Model === DayCategory){
-  
+
+if (Model === DayCategory) {
+  const { name, day, foodItems } = req.body;
+
+  // Check if foodItems is provided and if it's an array
+  if (foodItems && !Array.isArray(foodItems)) {
+    throw new AppError('If provided, foodItems must be an array.', 400);
+  }
+
+  let existingDayCategory = await DayCategory.findOne({ name, day });
+
+  if (existingDayCategory) {
+    if (foodItems) {
+      // Add new foodItems to existingDayCategory if they do not already exist
+      foodItems.forEach(foodItemId => {
+        if (!existingDayCategory.foodItems.includes(foodItemId)) {
+          existingDayCategory.foodItems.push(foodItemId);
+        }
+      });
+
+      // Save the updated day category
+      await existingDayCategory.save();
+
+      res.status(200).json({
+        status: 'success',
+        message: `Day category updated successfully with new food items for ${day}.`,
+        data: existingDayCategory
+      });
+
+      return existingDayCategory;
+    } else {
+      res.status(200).json({
+        status: 'success',
+        message: `Day category already exists for ${day}. No changes made to food items.`,
+        data: existingDayCategory
+      });
+
+      return existingDayCategory;
+    }
+  } else {
+    // Create a new day category with provided foodItems or an empty array if none provided
+    const newDayCategory = new DayCategory({ name, day, foodItems: foodItems || [] });
+    await newDayCategory.save();
+
+    res.status(201).json({
+      status: 'success',
+      message: `Day category created successfully for ${day}.`,
+      data: newDayCategory
+    });
+
+    return newDayCategory;
+  }
 }
+
     if (Model === Subscriber) {
 
       
@@ -399,7 +450,7 @@ const handleModelOperation = (Model, operation) => {
               });
             }
           } else {
-            result = await createOrUpdateObject(req, Model);
+            result = await createOrUpdateObject(res,req, Model);
             res.status(201).json({
               status: 'success',
               message: `${Model.modelName} created successfully`,
@@ -497,7 +548,7 @@ const handleModelOperation = (Model, operation) => {
           });
           break; // Added break statement
         case 'update':
-          result = await createOrUpdateObject(req, Model, true);
+          result = await createOrUpdateObject(res,req, Model, true);
           res.status(200).json({
             status: 'success',
             message: `${Model.modelName} updated successfully`,

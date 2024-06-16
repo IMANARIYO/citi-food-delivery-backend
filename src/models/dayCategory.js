@@ -37,30 +37,21 @@ dayCategorySchema.post('save', async function(doc) {
     try {
       const day = doc.day;
       const dayCategoryNames = [doc.name];
-      const dayCategoryIds =  [doc._id.toString()];
+      const dayCategoryIds = [doc._id];
   
       // Check if the weekDay already exists
       let existingWeek = await weekDay.findOne({ day });
   
+      
       if (existingWeek) {
         // Update existing weekDay document
-        let updated = false;
-  
-        existingWeek.dayCategoryNames.forEach((name, index) => {
-          if (name === doc.name) {
-            existingWeek.dayCategoryNames[index] = doc.name;
-            updated = true;
-          }
-        });
-  
-        if (!updated) {
+        if (!existingWeek.dayCategoryNames.includes(doc.name)) {
           existingWeek.dayCategoryNames.push(doc.name);
-        }
-  
-        existingWeek.dayCategories = [...new Set([
-          ...existingWeek.dayCategories.map(id => id.toString()),
-          ...dayCategoryIds
-        ])];
+          if (!existingWeek.dayCategories.includes(doc._id)) {
+          existingWeek.dayCategories.push(doc._id);
+        }}
+
+       
         
         await existingWeek.save();
       } else {
