@@ -31,16 +31,25 @@ const createDayForWeek = async (req, res) => {
     }
 
     // Check if the day already exists
-    let existingWeek = await weekDay.findOne({ day, })
+    let existingWeek = await weekDay.findOne({day})
+// Normalize dayCategoryNames to always be an array
+if (!Array.isArray(dayCategoryNames)) {
+  dayCategoryNames = [dayCategoryNames]
+}
 
     if (existingWeek) {
       // Update the existing document
       existingWeek.dayCategoryNames = [
         ...new Set([...existingWeek.dayCategoryNames, ...dayCategoryNames])
       ]
-      existingWeek.dayCategories = [
-        ...new Set([...existingWeek.dayCategories, ...dayCategoryIds])
-      ]
+      // existingWeek.dayCategories = [
+      //   ...new Set([...existingWeek.dayCategories, ...dayCategoryIds])
+      // ]
+
+      const existingCategoryIds = existingWeek.dayCategories.map(id => id.toString());
+      const uniqueDayCategoryIds = [...new Set([...existingCategoryIds, ...dayCategoryIds])];
+
+      existingWeek.dayCategories = uniqueDayCategoryIds;
       await existingWeek.save()
       return res.status(200).json({
         message: 'Day already exists. Existing week updated successfully.',

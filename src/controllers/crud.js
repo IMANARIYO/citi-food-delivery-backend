@@ -229,6 +229,8 @@ newObject.phoneNumber = phonenumber;
 
       return payment;
     }
+
+
     if(Model ===Subscription){
       const { type, amount, dayCategory } = req.body;
       // Check for existing subscription with the same type and dayCategory
@@ -256,6 +258,9 @@ else if( req.body.type==='bi-weekly'){
 
  
 
+}
+if(Model === DayCategory){
+  
 }
     if (Model === Subscriber) {
 

@@ -37,7 +37,7 @@ dayCategorySchema.post('save', async function(doc) {
     try {
       const day = doc.day;
       const dayCategoryNames = [doc.name];
-      const dayCategoryIds = [doc._id];
+      const dayCategoryIds =  [doc._id.toString()];
   
       // Check if the weekDay already exists
       let existingWeek = await weekDay.findOne({ day });

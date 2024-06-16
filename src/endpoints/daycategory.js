@@ -14,6 +14,6 @@ DayCategoryRouter.post('/create-day-categories', createModelHandler(DayCategory)
 DayCategoryRouter.get('/get-all-day-categories', readModelHandler(DayCategory));
 DayCategoryRouter.get('/getday-category/:id', readModelHandler(DayCategory));
 DayCategoryRouter.put('/update-day-category/:id', updateModelHandler(DayCategory));
-DayCategoryRouter.delete('/delete-dayy-category/:id', deleteModelHandler(DayCategory));
+DayCategoryRouter.delete('/delete-day-category/:id', deleteModelHandler(DayCategory));
 
 export default DayCategoryRouter;
