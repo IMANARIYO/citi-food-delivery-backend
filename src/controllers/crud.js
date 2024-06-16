@@ -22,22 +22,7 @@ cloudinary.config({
   api_secret: process.env.API_SECRET,
 });
 
-// Function to calculate total cost for a selected daySchema in WeeklyMenu
-const calculateTotalCost = async (daySchema) => {
-  let totalCost = 0;
-  const weeklyMenu = await WeeklyMenu.findOne();
-  
 
-  if (weeklyMenu && weeklyMenu[daySchema]) {
-    const meals = ['morning', 'lunch', 'dinner'];
-    meals.forEach(meal => {
-      if (weeklyMenu[daySchema][meal]) {
-        totalCost += weeklyMenu[daySchema][meal].totalCost || 0;
-        }
-    });
-  }
-  return totalCost;
-};
 // Helper function to delete existing weekly menu for a specific day
 const deleteExistingWeeklyMenu = async (day) => {
   console.log(`Deleting existing weekly menu for ${day}`);
@@ -267,15 +252,8 @@ else if( req.body.type==='bi-weekly'){
   newObject.dailyprice=req.body.amount/15;
   newObject.type=req.body.type;
 }
-   
- // Validate subscription amount against total cost for selected daySchema
- if (daySchema) {
-  console.log(daySchema);
-  const totalCost = await calculateTotalCost(daySchema);
-  if (amount < totalCost) {
-    throw new AppError(`Subscription amount (${amount}) cannot be less than total cost (${totalCost}) for ${daySchema}`, 400);
-  }
-}
+
+ 
 
 }
     if (Model === Subscriber) {
