@@ -6,7 +6,8 @@ const subscriptionRouter = express.Router();
 
 subscriptionRouter.post('/create-subscription', createModelHandler(Subscription));
 subscriptionRouter.get('/get-all', readModelHandler(Subscription));
-subscriptionRouter.put('/getby-id/:id', updateModelHandler(Subscription));
+subscriptionRouter.get('/get-subscription-by-id/:id', readModelHandler(Subscription));
+subscriptionRouter.put('/update/:id', updateModelHandler(Subscription));
 subscriptionRouter.delete('/delete/:id', deleteModelHandler(Subscription));
 
 export default subscriptionRouter;

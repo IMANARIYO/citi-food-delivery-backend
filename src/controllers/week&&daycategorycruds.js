@@ -1,7 +1,6 @@
-import Order from '../models/Order.js'
-import { DayCategory } from '../models/dayCategory.js'
-
-import { weekDay } from '../models/Weekday.js'
+import Order from "../models/Order.js";
+import { weekDay } from "../models/Weekday.js";
+import { DayCategory } from "../models/dayCategory.js";
 
 const createDayForWeek = async (req, res) => {
   try {
@@ -16,7 +15,7 @@ const createDayForWeek = async (req, res) => {
 
     // Create or find existing DayCategories based on the provided names
     for (const name of dayCategoryNames) {
-      let dayCategory = await DayCategory.findOne({ name, day })
+      let dayCategory = await DayCategory.findOne({ name })
 
       if (!dayCategory) {
         dayCategory = new DayCategory({
@@ -25,12 +24,14 @@ const createDayForWeek = async (req, res) => {
           day
         })
         await dayCategory.save()
-        dayCategoryIds.push(dayCategory._id)
+       
       }
+      // Ensure the ID is added to the list
+      dayCategoryIds.push(dayCategory._id.toString());
     }
 
     // Check if the day already exists
-    let existingWeek = await weekDay.findOne({ day })
+    let existingWeek = await weekDay.findOne({ day, })
 
     if (existingWeek) {
       // Update the existing document
