@@ -33,17 +33,6 @@ dailyprice:{
 },
 }, { timestamps: true }).set('strictPopulate', false);
 
-// Pre-save middleware to update daily price
-subscriptionSchema.pre('save', function (next) {
-  if (this.type === 'weekly') {
-    this.dailyprice = this.weeklyAmount / 7;
-  } else if (this.type === 'bi-weekly') {
-    this.dailyprice = this.biWeeklyAmount / 14;
-  } else if (this.type === 'monthly') {
-    this.dailyprice = this.monthlyAmount / 30;
-  }
-  next();
-});
 
 // Pre-save middleware to populate menu based on dayCategory existence
 subscriptionSchema.pre('save', async function(next) {
@@ -87,6 +76,13 @@ subscriptionSchema.pre('save', async function(next) {
       await newWeekDay.save();
     }
 
+    if (this.type === 'weekly') {
+      this.dailyprice = this.weeklyAmount / 7;
+    } else if (this.type === 'bi-weekly') {
+      this.dailyprice = this.biWeeklyAmount / 14;
+    } else if (this.type === 'monthly') {
+      this.dailyprice = this.monthlyAmount / 30;
+    }
     next();
   } catch (error) {
     next(error);
