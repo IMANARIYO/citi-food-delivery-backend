@@ -77,10 +77,13 @@ subscriptionSchema.pre('save', async function(next) {
     }
 
     if (this.type === 'weekly') {
+      this.weeklyAmount=this.amount
       this.dailyprice = this.weeklyAmount / 7;
     } else if (this.type === 'bi-weekly') {
+      this.biWeeklyAmount=this.amount=
       this.dailyprice = this.biWeeklyAmount / 14;
     } else if (this.type === 'monthly') {
+      this.monthlyAmount=this.amount
       this.dailyprice = this.monthlyAmount / 30;
     }
     next();
