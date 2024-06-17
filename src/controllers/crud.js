@@ -496,6 +496,13 @@ const handleModelOperation = (Model, operation) => {
               }
             })
             .populate({
+              path: 'foodItems',
+              populate: {
+                path: 'category',
+                model: 'Category'
+              }
+            })
+            .populate({
               path: 'items.foodItem',
               populate: {
                 path: 'category'
@@ -506,15 +513,15 @@ const handleModelOperation = (Model, operation) => {
     path: 'foodItem',
   }
 
-})          .populate({
+})         
+ .populate({
               path: 'foodItem',
               populate: {
                 path: 'category',
+              
               }
-            }).populate({
-              path: 'menu.foodItems',
-              model: 'foodItem'
-            });
+            })
+            ;
             // Comprehensive population for Notification model
           if (Model === Notification) {
             query
