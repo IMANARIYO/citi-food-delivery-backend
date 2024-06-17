@@ -504,6 +504,9 @@ const handleModelOperation = (Model, operation) => {
               populate: {
                 path: 'category',
               }
+            }).populate({
+              path: 'menu.foodItems',
+              model: 'foodItem'
             });
             // Comprehensive population for Notification model
           if (Model === Notification) {
