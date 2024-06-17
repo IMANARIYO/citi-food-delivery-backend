@@ -489,6 +489,13 @@ const handleModelOperation = (Model, operation) => {
             .populate('dayCategories')
             .populate('subscriber')
             .populate({
+              path: 'menu.foodItems',
+              populate: {
+                path: 'category',
+                model: 'Category'
+              }
+            })
+            .populate({
               path: 'items.foodItem',
               populate: {
                 path: 'category'
