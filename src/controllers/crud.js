@@ -487,6 +487,7 @@ const handleModelOperation = (Model, operation) => {
             .populate('reviews')
             .populate('subscriptionId')
             .populate('dayCategories')
+            .populate('subscriber')
             .populate({
               path: 'items.foodItem',
               populate: {
