@@ -13,7 +13,7 @@ const RestourantSchema = new Schema({
   images: [String],
   contactPerson: { type: String, required: true },
   email: { type: String, required: true }
-})
+}).set('strictPopulate', false);
 
 const Restourant = mongoose.model('Restourant', RestourantSchema)
 

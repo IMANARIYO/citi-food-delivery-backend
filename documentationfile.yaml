@@ -344,30 +344,13 @@ components:
         email:
           type: string
           example: "john.doe@example.com"
-        picture:
+        image:
           type: string
+          format: binary
           example: "url_to_profile_picture"
-        password:
-          type: string
-          example: "hashedpassword"
         gender:
           type: string
           example: "Male"
-        role:
-          type: string
-          example: "user"
-        otpExpiresAt:
-          type: string
-          example: "2023-12-31T23:59:59Z"
-        otp:
-          type: string
-          example: "123456"
-        token:
-          type: string
-          example: "jwt_token"
-        verified:
-          type: boolean
-          example: true
         location:
           type: string
           example: "City, Country"
@@ -716,7 +699,7 @@ paths:
           description: ID of the user to be updated
       requestBody:
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
@@ -726,30 +709,13 @@ paths:
                 email:
                   type: string
                   example: "john.doe@example.com"
-                picture:
+                image:
                   type: string
+                  format: binary
                   example: "url_to_profile_picture"
-                password:
-                  type: string
-                  example: "newpassword123"
                 gender:
                   type: string
                   example: "Male"
-                role:
-                  type: string
-                  example: "user"
-                otpExpiresAt:
-                  type: string
-                  example: "2023-12-31T23:59:59Z"
-                otp:
-                  type: string
-                  example: "123456"
-                token:
-                  type: string
-                  example: "jwt_token"
-                verified:
-                  type: boolean
-                  example: true
                 location:
                   type: string
                   example: "City, Country"
