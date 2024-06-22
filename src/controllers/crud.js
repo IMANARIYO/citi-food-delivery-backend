@@ -436,7 +436,7 @@ const createOrUpdateObject = async (res, req, Model, isUpdate = false) => {
         message:
           'subscription made sbscription made succcessfully go and pay for stating.',
         userId: userId,
-        subscriber: newObject._id,
+    
         status: 'unread'
       })
       await notification.save()
