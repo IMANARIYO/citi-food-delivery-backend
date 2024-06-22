@@ -1,6 +1,7 @@
 import Cart from "../models/Cart.js";
 import Notification from "../models/Notification.js";
 import Order from "../models/Order.js";
+import { AppError } from "../middlewares/globaleerorshandling.js";
 
 // Utility function to calculate total price
 const calculateTotalPrice = (items) => {

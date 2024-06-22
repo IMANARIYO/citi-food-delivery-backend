@@ -1,19 +1,20 @@
 import mongoose from "mongoose";
 
-const { Schema } = mongoose;
+const { Schema } = mongoose
 
-const restaurantSchema = new Schema({
+const RestourantSchema = new Schema({
   name: { type: String, required: true },
-  location: {
+
     latitude: { type: Number, required: true },
-    longitude: { type: Number, required: true }
-  },
+    longitude: { type: Number, required: true },
+
+
   address: { type: String, required: true },
   images: [String],
   contactPerson: { type: String, required: true },
   email: { type: String, required: true }
-});
+})
 
-const Restaurant = mongoose.model('Restaurant', restaurantSchema);
+const Restourant = mongoose.model('Restourant', RestourantSchema)
 
-export default Restaurant;
+export default Restourant

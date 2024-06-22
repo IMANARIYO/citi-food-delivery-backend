@@ -19,6 +19,28 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    Restourant:
+      type: object
+      properties:
+        name:
+          type: string
+        location:
+          type: object
+          properties:
+            latitude:
+              type: number
+            longitude:
+              type: number
+        address:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+        contactPerson:
+          type: string
+        email:
+          type: string
     WeeklyMenu:
       type: object
       properties:
@@ -933,12 +955,7 @@ paths:
             type: string
           required: true
           description: ID of the food item to remove from the cart
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RemoveFromCartRequest'
+      
       responses:
         '200':
           description: Item removed from the cart successfully
@@ -2620,7 +2637,191 @@ paths:
           description: Not Found
         '500':
           description: Internal Server Error
-  
+  /citi_api/v1/restourant/create:
+    post:
+      summary: Create or update the Restourant profile
+      tags:
+        - Restourant
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the Restourant
+                latitude:
+                  type: number
+                  description: Latitude of the Restourant location
+                longitude:
+                  type: number
+                  description: Longitude of the Restourant location
+                address:
+                  type: string
+                  description: The address of the Restourant
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Array of image files
+                contactPerson:
+                  type: string
+                  description: Contact person for the Restourant
+                email:
+                  type: string
+                  description: Contact email for the Restourant
+              required:
+                - name
+                - latitude
+                - longitude
+                - address
+                - contactPerson
+                - email
+      responses:
+        '201':
+          description: Restourant profile created or updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Restourant profile created or updated successfully
+                  Restourant:
+                    $ref: '#/components/schemas/Restourant'
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error
+
+  /citi_api/v1/restourant/get:
+    get:
+      summary: Get the Restourant profile
+      tags:
+        - Restourant
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Restourant'
+        '404':
+          description: Restourant profile not found
+        '500':
+          description: Internal Server Error
+
+  /citi_api/v1/restourant/update:
+    put:
+      summary: Update the Restourant profile
+      tags:
+        - Restourant
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the Restourant
+                latitude:
+                  type: number
+                  description: Latitude of the Restourant location
+                longitude:
+                  type: number
+                  description: Longitude of the Restourant location
+                address:
+                  type: string
+                  description: The address of the Restourant
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Array of image files
+                contactPerson:
+                  type: string
+                  description: Contact person for the Restourant
+                email:
+                  type: string
+                  description: Contact email for the Restourant
+              required:
+                - name
+                - latitude
+                - longitude
+                - address
+                - contactPerson
+                - email
+      responses:
+        '200':
+          description: Restourant profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Restourant profile updated successfully
+                  Restourant:
+                    $ref: '#/components/schemas/Restourant'
+        '400':
+          description: Bad Request
+        '404':
+          description: Restourant profile not found
+        '500':
+          description: Internal Server Error
+
+  /citi_api/v1/restourant/getby-id/{id}:
+    get:
+      summary: Get Restourant profile by ID
+      tags:
+        - Restourant
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: The ID of the Restourant profile to get
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Restourant'
+        '404':
+          description: Restourant profile not found
+        '500':
+          description: Internal Server Error
+
+  /citi_api/v1/restourant/delete:
+    delete:
+      summary: Delete the Restourant profile
+      tags:
+        - Restourant
+      responses:
+        '200':
+          description: Restourant profile deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Restourant profile deleted successfully
+        '404':
+          description: Restourant profile not found
+        '500':
+          description: Internal Server Error
   
   
   /partner/createPartner:

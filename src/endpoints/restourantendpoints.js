@@ -1,56 +1,42 @@
-import Restaurant from "../models/restoutantprofile.js";
-import express from "express";
+import Restourant from '../models/restoutantprofile.js'
+import dotenv from 'dotenv'
+import express from 'express'
+import { v2 as cloudinary } from 'cloudinary'
+import { uploaded } from '../utils/multer.js'
 
-Restaurant
-const RestaurantRouter = express.Router();
+import {
+  createModelHandler,
+  deleteModelHandler,
+  readModelHandler,
+  updateModelHandler
+} from '../controllers/crud.js'
+dotenv.config()
 
-// Create or update the restaurant profile
-RestaurantRouter.post('/', async (req, res) => {
-  try {
-    const restaurant = await Restaurant.findOneAndUpdate({}, req.body, { upsert: true, new: true, runValidators: true });
-    res.status(201).send(restaurant);
-  } catch (error) {
-    res.status(400).send(error);
-  }
-});
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET
+})
+Restourant
+const RestourantRouter = express.Router()
 
-// Get the restaurant profile
-RestaurantRouter.get('/', async (req, res) => {
-  try {
-    const restaurant = await Restaurant.findOne();
-    if (!restaurant) {
-      return res.status(404).send();
-    }
-    res.status(200).send(restaurant);
-  } catch (error) {
-    res.status(500).send(error);
-  }
-});
+dotenv.config()
 
-// Update the restaurant profile
-RestaurantRouter.put('/', async (req, res) => {
-  try {
-    const restaurant = await Restaurant.findOneAndUpdate({}, req.body, { new: true, runValidators: true });
-    if (!restaurant) {
-      return res.status(404).send();
-    }
-    res.status(200).send(restaurant);
-  } catch (error) {
-    res.status(400).send(error);
-  }
-});
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET
+})
 
-// Delete the restaurant profile
-RestaurantRouter.delete('/', async (req, res) => {
-  try {
-    const restaurant = await Restaurant.findOneAndDelete();
-    if (!restaurant) {
-      return res.status(404).send();
-    }
-    res.status(200).send(restaurant);
-  } catch (error) {
-    res.status(500).send(error);
-  }
-});
+// Create or update the Restourant profile
+RestourantRouter.post('/create', uploaded, createModelHandler(Restourant))
 
-export default RestaurantRouter;
+// Get the Restourant profile
+RestourantRouter.get('/get', readModelHandler(Restourant))
+
+// Update the Restourant profile
+RestourantRouter.put('/update', uploaded, updateModelHandler(Restourant))
+RestourantRouter.get('/getby-id/:id', readModelHandler(Restourant))
+RestourantRouter.delete('/delete', deleteModelHandler(Restourant))
+
+export default RestourantRouter

@@ -77,6 +77,8 @@ subscriptionSchema.pre('save', async function(next) {
     }
 
     if (this.type === 'weekly') {
+      console.log("weekly")
+      console.log(this.amount)
       this.weeklyAmount=this.amount
       this.dailyprice = this.weeklyAmount / 7;
     } else if (this.type === 'bi-weekly') {
