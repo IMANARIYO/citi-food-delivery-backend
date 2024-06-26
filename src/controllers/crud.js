@@ -431,16 +431,7 @@ const createOrUpdateObject = async (res, req, Model, isUpdate = false) => {
       return Promise.all(foodItemPromises)
     }
     let newthing = await Model.create(newObject)
-    if (Model === Subscriber) {
-      const notification = new Notification({
-        message:
-          'subscription made sbscription made succcessfully go and pay for stating.',
-        userId: userId,
-    
-        status: 'unread'
-      })
-      await notification.save()
-    }
+   
     return newthing
   }
 }
