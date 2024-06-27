@@ -72,21 +72,20 @@ subscribersRouter.post('/pay/:subscribId', async (req, res) => {
     }
 
   
-    // Create a notification
-    const notification = new Notification({
-      message: 'Subscription paid successfully. Delivery in process.',
-      userId: userId,
-      status: 'unread',
-    });
-    await notification.save();
+    // // Create a notification
+    // const notification = new Notification({
+    //   message: 'Subscription paid successfully. Delivery in process.',
+    //   userId: userId,
+    //   status: 'unread',
+    // });
+    // await notification.save();
 
     res.status(201).json({
       status: 'success',
       message: 'Payment processed successfully',
       data: {
         payment: newPayment,
-        subscriber,
-        notification
+        subscriber
       }
     });
   } catch (error) {

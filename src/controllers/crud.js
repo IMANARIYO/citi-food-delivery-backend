@@ -245,7 +245,7 @@ const createOrUpdateObject = async (res, req, Model, isUpdate = false) => {
 
     if (Model === Subscription) {
       const { type, amount, dayCategory } = req.body
-      // Check for existing subscription with the same type and dayCategory
+
       const existingSubscription = await Subscription.findOne({
         type,
         dayCategory
@@ -272,16 +272,7 @@ const createOrUpdateObject = async (res, req, Model, isUpdate = false) => {
     }
     if (Model === Restourant) {
       const { latitude, longitude,locatrion, newObject } = {...req.body};
-      // console.log(newObject)
-     
       
-      // req.body.location={latitude,longitude};
-      // newObject.location=req.body.latitude;
-      // newObject.location.latitude = req.body.latitude;
-      // newObject.location.latitude = req.body.latitude;
-      // newObject.location.longitude = req.body.longitude;
-      // newObject.location.latitude = req.body.latitude
-      // newObject.location.longitude = req.body.longitude
     }
     if (Model === DayCategory) {
       const { name, day, foodItems } = req.body
@@ -481,7 +472,7 @@ const handleModelOperation = (Model, operation) => {
               data: result
             })
           }
-          break // Added break statement
+          break ;
         case 'read':
           let query
           if (req.userId) {
