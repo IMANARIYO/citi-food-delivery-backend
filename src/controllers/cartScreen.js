@@ -10,10 +10,11 @@ const calculateTotalPrice = (items) => {
   }, 0);
 };
 
-
 // Handler function to add or update items in the cart
 export const addToCartHandler = async (req, res, next) => {
+
   try {
+
     let userId=req.userId;
     let foodItemId=req.params.foodItemId;
 
@@ -114,11 +115,13 @@ export const updateCartHandler = async (req, res, next) => {
 // Handler function to remove item from the cart
 export const removeFromCartHandler = async (req, res, next) => {
   try {
-    const { userId, foodItemId } = req.body;
-    const cart = await Cart.findOne({ userId });
+    let userId=req.userId;
+    let foodItemId=req.params.foodItemId;
+    const cart = await Cart.findOne({userId });
+    console.log(userId)
 
     if (!cart) {
-      throw new AppError('Cart not found for user', 404);
+      throw new AppError(`not cart found this user`, 404);
     }
 
     // Remove the item from the cart

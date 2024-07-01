@@ -1,4 +1,3 @@
-import Cart from "../models/Cart.js";
 import express from "express";
 import { addToCartHandler, checkoutHandler, getCartHandler, removeFromCartHandler, updateCartHandler } from "../controllers/cartScreen.js";
 import { verifyingtoken } from "../utils/jwtfunctions.js";
