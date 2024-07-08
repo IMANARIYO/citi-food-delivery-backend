@@ -487,9 +487,9 @@ const handleModelOperation = (Model, operation) => {
                 Model === Cart ||
                 Model === Subscriber
               ) {
-                query = Model.find({ userId: req.userId ,deleted:false})
+                query = Model.find({ userId: req.userId ,deleted: false})
               } else {
-                query = Model.find({deleted:false})
+                query = Model.find({deleted: false})
               }
             }
           } else {
@@ -497,7 +497,7 @@ const handleModelOperation = (Model, operation) => {
           }
 
           if (req.params.id) {
-            query = Model.findById(req.params.id)
+            query = Model.findById(req.params.id).where('deleted', false);
           }
 
           query
@@ -602,8 +602,8 @@ const handleModelOperation = (Model, operation) => {
             )
           }
           // result = await Model.findByIdAndDelete(req.params.id)
-          Model.deleted=true
-          await Model.save();
+          documentToDelete.deleted = true;
+          await documentToDelete.save();
           res.status(200).json({
             status: 'success',
             message: `${Model.modelName} deleted successfully`,
