@@ -17,6 +17,10 @@ const paymentSchema = new mongoose.Schema({
   currency: { type: String, default: 'frw' },
   paymentMethod: { type: String, required: true },
   transactionId: { type: String, required: false },
+  deleted:{type:Boolean,
+    default:false,
+    required:false
+  },
   groupPayments: {
     type: [individualPaymentSchema],
     required: true

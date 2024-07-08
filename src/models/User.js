@@ -34,6 +34,10 @@ const usersSchema = new mongoose.Schema({
         type: String,
         required: false
     },
+    deleted:{type:Boolean,
+        default:false,
+        required:false
+      },
     otp: {
         type: String,
         required: false

@@ -27,6 +27,10 @@ menu: [{
     type: Number,
     required: false
   },
+  deleted:{type:Boolean,
+    default:false,
+    required:false
+  },
 dailyprice:{
     type: Number,
     required: false

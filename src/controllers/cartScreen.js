@@ -118,7 +118,7 @@ export const removeFromCartHandler = async (req, res, next) => {
     let userId=req.userId;
     let foodItemId=req.params.foodItemId;
     const cart = await Cart.findOne({userId });
-    console.log(userId)
+
 
     if (!cart) {
       throw new AppError(`not cart found this user`, 404);

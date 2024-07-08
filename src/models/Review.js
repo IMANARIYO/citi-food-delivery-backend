@@ -7,6 +7,10 @@ const reviewSchema = new mongoose.Schema(
       ref: 'User',
       required: true
     },
+    deleted:{type:Boolean,
+      default:false,
+      required:false
+    },
     foodItem: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'foodItem',

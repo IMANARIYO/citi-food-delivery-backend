@@ -10,6 +10,10 @@ const SubscriberSchema = new mongoose.Schema({
     type: Number,
     required: false
   },
+  deleted:{type:Boolean,
+    default:false,
+    required:false
+  },
   weeklyAmount: {
     type: Number,
     required: false

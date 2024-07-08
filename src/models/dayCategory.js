@@ -8,6 +8,10 @@ const dayCategorySchema = new mongoose.Schema(
       type: String,
       required: true
     },
+    deleted:{type:Boolean,
+      default:false,
+      required:false
+    },
     foodItems: [
       {
         type: mongoose.Schema.Types.ObjectId,

@@ -11,6 +11,10 @@ const weekDaySchema = new mongoose.Schema({
     dayCategoryNames:[ {
        
     }],
+    deleted:{type:Boolean,
+      default:false,
+      required:false
+    },
     dayCategories:[ {
         type: mongoose.Schema.Types.ObjectId, ref: 'DayCategory', required: false
     }],

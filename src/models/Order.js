@@ -7,8 +7,12 @@ const orderSchema = new mongoose.Schema(
       ref: 'User',
       required: true
     },
+    deleted:{type:Boolean,
+      default:false,
+      required:false
+    },
     email: { type: String, required: true },
-    delivelinglocation:{type:String,},
+    delivelinglocation:{type:String},
     items: [
       {
         foodItem: {

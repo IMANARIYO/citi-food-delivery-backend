@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 
 const categorySchema = new mongoose.Schema({
   name: { type: String, required: true },
+  deleted:{type:Boolean,
+    default:false,
+    required:false
+  },
   images: [{ type: String,  }],
 }, { timestamps: true }).set('strictPopulate', false);
 // Static method for search functionality

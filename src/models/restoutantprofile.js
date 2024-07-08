@@ -8,7 +8,10 @@ const RestourantSchema = new Schema({
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true },
 
-
+    deleted:{type:Boolean,
+      default:false,
+      required:false
+    },
   address: { type: String, required: true },
   images: [String],
   contactPerson: { type: String, required: true },

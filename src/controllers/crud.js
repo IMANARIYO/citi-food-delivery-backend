@@ -272,7 +272,7 @@ const createOrUpdateObject = async (res, req, Model, isUpdate = false) => {
     }
     if (Model === Restourant) {
       const { latitude, longitude,locatrion, newObject } = {...req.body};
-      
+      await Restourant.deleteMany({})
     }
     if (Model === DayCategory) {
       const { name, day, foodItems } = req.body
@@ -487,13 +487,13 @@ const handleModelOperation = (Model, operation) => {
                 Model === Cart ||
                 Model === Subscriber
               ) {
-                query = Model.find({ userId: req.userId })
+                query = Model.find({ userId: req.userId ,deleted:false})
               } else {
-                query = Model.find()
+                query = Model.find({deleted:false})
               }
             }
           } else {
-            query = Model.find()
+            query = Model.find({deleted:false})
           }
 
           if (req.params.id) {
@@ -601,7 +601,9 @@ const handleModelOperation = (Model, operation) => {
               404
             )
           }
-          result = await Model.findByIdAndDelete(req.params.id)
+          // result = await Model.findByIdAndDelete(req.params.id)
+          Model.deleted=true
+          await Model.save();
           res.status(200).json({
             status: 'success',
             message: `${Model.modelName} deleted successfully`,
