@@ -14,6 +14,8 @@ const SubscriberSchema = new mongoose.Schema({
     default:false,
     required:false
   },
+  latitude: { type: Number, required: true },
+  longitude: { type: Number, required: true },
   weeklyAmount: {
     type: Number,
     required: false

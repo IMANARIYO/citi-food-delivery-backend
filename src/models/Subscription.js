@@ -18,8 +18,7 @@ menu: [{
     type: Number,
     required: false
   },
-  latitude: { type: Number, required: true },
-  longitude: { type: Number, required: true },
+ 
   weeklyAmount:{
     type: Number,
     required: false

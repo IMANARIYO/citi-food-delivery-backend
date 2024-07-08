@@ -101,6 +101,12 @@ components:
     Subscriber:
       type: object
       properties:
+        latitude:
+          type: number
+          description: Latitude of the Restourant location
+        longitude:
+          type: number
+          description: Longitude of the Restourant location  
         numberOfPeople:
           type: integer
           description: The number of people subscription
@@ -116,12 +122,7 @@ components:
           type: number
         dayCategory:
           type: string
-        latitude:
-          type: number
-          description: Latitude of the Restourant location
-        longitude:
-          type: number
-          description: Longitude of the Restourant location  
+        
     AddToCartRequest:
       type: object
       properties:
@@ -2214,6 +2215,12 @@ paths:
                   type: integer
                   description: Number of people subscribing
                   example: 4
+                latitude:
+                   type: number
+                   description: Latitude of the Restourant location
+                longitude:
+                  type: number
+                  description: Longitude of the Restourant location     
       responses:
         '201':
           description: Created
