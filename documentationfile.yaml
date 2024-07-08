@@ -116,7 +116,12 @@ components:
           type: number
         dayCategory:
           type: string
-          
+        latitude:
+          type: number
+          description: Latitude of the Restourant location
+        longitude:
+          type: number
+          description: Longitude of the Restourant location  
     AddToCartRequest:
       type: object
       properties:

@@ -154,10 +154,13 @@ export const checkoutHandler = async (req, res, next) => {
     const totalPrice = calculateTotalPrice(cart.foodItems);
 
     // Create a new order based on the cart contents
+    const{latitude,longitude}={...req.body}
     const order = new Order({
       delivelinglocation:req.user.delivelinglocation,
       userId: cart.userId,
-      email: req.user.email, // Assuming user's email is stored in req.user.email
+      latitude:latitude,
+      longitude:longitude,
+      email: req.user.email, 
       items: cart.foodItems.map(item => ({
         foodItem: item.foodItem._id,
         quantity: item.quantity

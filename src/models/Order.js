@@ -23,6 +23,8 @@ const orderSchema = new mongoose.Schema(
         quantity: { type: Number, required: true }
       }
     ],
+    latitude: { type: Number, required: true },
+    longitude: { type: Number, required: true },
     totalPrice: { type: Number, required: true },
     status: { type: String, default: 'pending' },
     customerPhone: { type: String, required: false },
