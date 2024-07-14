@@ -1627,6 +1627,80 @@ paths:
                   $ref: '#/components/schemas/FoodItem'
         '500':
           description: Internal Server Error
+  /citi_api/v1/fooditem/foodItem/{id}/discount:
+    put:
+      summary: Apply discount to a food item
+      tags: [fooditem]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "60fe5b6d2fba530015d48414"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                discount:
+                  type: number
+                  example: 10
+      responses:
+        '200':
+          description: Discount applied successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Discount applied successfully"
+                  item:
+                    $ref: '#/components/schemas/FoodItem'
+        '400':
+          description: Invalid discount value or food item not found
+        '500':
+          description: Server error
+  /citi_api/v1/fooditem/foodItem/{id}/remove-discount:
+    put:
+      summary: Remove discount from a food item
+      tags: [fooditem]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "60fe5b6d2fba530015d48414"
+      responses:
+        '200':
+          description: Discount removed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Discount removed successfully"
+                  item:
+                    $ref: '#/components/schemas/FoodItem'
+        '404':
+          description: Food item not found
+        '500':
+          description: Server error
+  
+  
+  
+  
   /citi_api/v1/favorite/create:
     post:
       summary: Create a new favorite

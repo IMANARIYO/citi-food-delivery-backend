@@ -13,6 +13,8 @@ const foodItemSchema = new mongoose.Schema(
       default:false,
       required:false
     },
+    discount: { type: Number, default: 0 },
+    originalPrice: { type: Number, default: 0 }, 
     price: { type: Number, required: true },
     description: { type: String, required: true },
     availableDays: [{ type: String, required: true }],
